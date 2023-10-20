@@ -1,15 +1,36 @@
 import pygame
+import imageio as iio
+
+def draw_map(img_map):
+	base_x = 0
+	base_y = 0
+	y = base_y
+	for line in img_map:
+		x = 0
+		for pixel in line:
+			square = pygame.Rect(base_x + x, y, size, size)
+			pygame.draw.rect(screen, pixel, square, 0)
+			x = x + 1
+			#print(x, y)
+		y = y + 1
+				
 
 # pygame setup
 pygame.init()
-screen = pygame.display.set_mode((1280, 720))
+screen = pygame.display.set_mode((720, 720))
 clock = pygame.time.Clock()
 running = True
 dt = 0
 
+# Set 'robot' position and size
 x = screen.get_width() / 2
 y = screen.get_height() / 2
 size = 30
+
+img_map = iio.imread(uri="map.bmp")
+#print(img_map)
+
+draw_map(img_map)
 
 paused = False
 
@@ -21,7 +42,7 @@ while running:
 		    running = False
 
 	# fill the screen with a color to wipe away anything from last frame
-	screen.fill("white")
+#	screen.fill("green")
 
 	position = pygame.Vector2(x, y)
 
@@ -33,12 +54,20 @@ while running:
 
 	if paused == False:
 		if keys[pygame.K_w]:
+			square = pygame.Rect(x, y, size, size)
+			pygame.draw.rect(screen, "white", square, 0)
 			y -= size * dt
 		if keys[pygame.K_s]:
+			square = pygame.Rect(x, y, size, size)
+			pygame.draw.rect(screen, "white", square, 0)
 			y += size * dt
 		if keys[pygame.K_a]:
+			square = pygame.Rect(x, y, size, size)
+			pygame.draw.rect(screen, "white", square, 0)
 			x -= size * dt
 		if keys[pygame.K_d]:
+			square = pygame.Rect(x, y, size, size)
+			pygame.draw.rect(screen, "white", square, 0)
 			x += size * dt
 
 	if keys[pygame.K_p]:
