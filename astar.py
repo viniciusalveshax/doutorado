@@ -1,6 +1,6 @@
 class AStar:
 
-	def __init__(self, map, start, end=(), marker='', type="position"):
+	def __init__(self, map, start, end=(), marker='', type="position", debug=False):
 		if (type == "position" and end == ()) or (type == "marker" and marker == ''):
 			raise Exception("Invalid constructor params")			
 		self.map = map
@@ -8,20 +8,26 @@ class AStar:
 		self.end = end
 		self.map_with_path = {}
 		self.path = []
+		self.debug_option = debug
+
+	def debug(self, value, label=''):
+		if self.debug_option == True:
+			if label != '':
+				print(label, value)
+			else:
+				print(value)
 
 	def get_path(self):
 		return self.path
 
 	def print_map_with_solution(self):
-
+		print("Map with solution:")
 		if self.map_with_path == {}:
 			return
-
-		print("Caminho dentro de print map", self.path)
+		self.debug(self.path, label="Caminho dentro de print map")
 		count_line = 0
 		for line in self.map:
 			count_column = 0
-		#	print("")
 			for char in line:
 				tmp_node = (count_line, count_column)
 				if tmp_node in self.path:
@@ -33,8 +39,9 @@ class AStar:
 
 
 	def print_map(self):
+		print("Original:")
 		for line in self.map:
-			print(line)
+			print(line[0:-1])
 
 	def print_position(self, position):
 		x, y = position[0], position[1]
@@ -55,10 +62,9 @@ class AStar:
 					return True
 
 	def get_neighbors(self, node):
-		print("Listando os vizinhos para ", node)
+		self.debug(node, label="Listando os vizinhos para ")
 		x, y = node[0], node[1]
 		neighbors = set()
-		print(x,y)
 		if self.test_neighbor(x-1, y):
 	#		print("Entrou")
 			neighbors = neighbors | {(x-1,y)}
@@ -87,7 +93,7 @@ class AStar:
 			index = 0
 			for node in nodes_list:
 				tmp_score = self.heuristic(node)
-				print("score", tmp_score, "para ", node)
+				self.debug(tmp_score, label="score: ")
 				if tmp_score < better_score:
 					better_score = tmp_score
 					better_index = index
@@ -111,20 +117,18 @@ class AStar:
 		
 		# repeat while there is candidates and not found a way yet
 		while len(to_visit) > 0 and found == False:
-			print("")
-			#input()
-		
+			
 			# Get better candidate for now
 			better_choice = self.get_better(to_visit)
-			print("Better choice", better_choice)
+			self.debug(better_choice, label="Better choice")
 			
 			# Add candidate to visited list (to not return to him)
 			visited = visited | {better_choice}
-			print("Visitados", visited)
+			self.debug(visited, label="Visitados")
 			
 			# Get neighbors of candidate
 			neighbors = self.get_neighbors(better_choice)
-			print("Vizinhos", neighbors)
+			self.debug(neighbors, label="Vizinhos")
 			
 			for neighbor in neighbors:
 				# If neighbor not was in parent list then save their parent
@@ -137,14 +141,14 @@ class AStar:
 			else:
 				# Filter the neighbors and leave only the non visited
 				non_visited_neighbors = neighbors - visited
-				print("Non visited neighbors", non_visited_neighbors)
+				self.debug(non_visited_neighbors, label="Non visited neighbors")
 				
 				# Add the remaining neighbors to list of candidates
 				to_visit = to_visit | non_visited_neighbors
 				
 				to_visit = to_visit - {better_choice}
 				
-			print("To visit", to_visit)
+			self.debug(to_visit, label="To visit")
 			
 			# End of while search loop
 
@@ -162,7 +166,7 @@ class AStar:
 				tmp_y = tmp_node[1]
 				if not (tmp_x, tmp_y) in self.map_with_path:
 					self.map_with_path[(tmp_x, tmp_y)] = 'x'
-				print("Pai", tmp_node)
+				self.debug(tmp_node, label="Pai")
 				tmp_node = parent[tmp_node]
 				count = count + 1
 
