@@ -1,11 +1,16 @@
 class AStar:
 
-	def __init__(self, map, start, end):
+	def __init__(self, map, start, end=(), marker='', type="position"):
+		if (type == "position" and end == ()) or (type == "marker" and marker == ''):
+			raise Exception("Invalid constructor params")			
 		self.map = map
 		self.start = start
 		self.end = end
 		self.map_with_path = {}
 		self.path = []
+
+	def get_path(self):
+		return self.path
 
 	def print_map_with_solution(self):
 
@@ -122,6 +127,7 @@ class AStar:
 			print("Vizinhos", neighbors)
 			
 			for neighbor in neighbors:
+				# If neighbor not was in parent list then save their parent
 				if not neighbor in parent:
 					parent[neighbor] = better_choice
 			
@@ -179,19 +185,15 @@ map = map_file.readlines()
 # Inside rooms    
 start = (3, 6)
 end = (7, 35)
-#start = (7, 12)
-#end = (12, 35)
 
-#print_position(start)
-#print_position(end)
-
-problem = AStar(map, start, end)
+problem = AStar(map=map, start=start, end=end)
 problem.print_map()
 
 # Return true if there is a path
 if problem.solve() == True:
 	print("Found a way")
 	problem.print_map_with_solution()
+	path_from_1_to_2 = problem.get_path()
 else:
 	print("There is no path between start and end")
 	
