@@ -2,8 +2,12 @@ class AStar:
 
 	def __init__(self, map, start, end=(), marker='', type="position", debug=False):
 		if (type == "position" and end == ()) or (type == "marker" and marker == ''):
-			raise Exception("Invalid constructor params")			
-		self.map = map
+			raise Exception("Invalid constructor params")
+		self.map = []
+		for line in map:
+			map_line = []
+			map_line = list(line)
+			self.map.append(map_line)
 		self.start = start
 		self.end = end
 		self.map_with_path = {}
@@ -183,14 +187,12 @@ class AStar:
 	
 
 map_file = open('map.txt', 'r')
-map = map_file.readlines()
-
     
 # Inside rooms    
 start = (3, 6)
 end = (7, 35)
 
-problem = AStar(map=map, start=start, end=end)
+problem = AStar(map=map_file, start=start, end=end)
 problem.print_map()
 
 # Return true if there is a path
