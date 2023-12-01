@@ -6,7 +6,8 @@ map_file = open('map.txt', 'r')
 start = (3, 6)
 end = (7, 35)
 
-problem = AStar(map=map_file, start=start, end=end)
+problem = AStar(map="map.txt", start=start, end=end)
+
 #problem.print_map()
 
 # Return true if there is a path

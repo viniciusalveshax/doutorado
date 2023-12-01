@@ -1,18 +1,40 @@
+import io
+
 class AStar:
 
 	def __init__(self, map, start, end=(), marker='', type="position", debug=False):
+
+		self.debug_option = debug
+
 		if (type == "position" and end == ()) or (type == "marker" and marker == ''):
 			raise Exception("Invalid constructor params")
-		self.map = []
-		for line in map:
-			map_line = []
-			map_line = list(line)
-			self.map.append(map_line)
+		
+		if isinstance(map, io.TextIOWrapper):
+			self.debug("Map argument is of type FileIO")
+			self.map = self.mapfile_to_list(map)
+		elif isinstance(map, str):
+			self.debug("Map argument is of type String")
+			map_file = open(map, 'r')
+			self.map = self.mapfile_to_list(map_file)
+		elif isinstance(map, list):
+			self.debug("Map argument is of type List")
+			self.map = map
+		else:
+			self.debug("Invalid map")
+			return
+
 		self.start = start
 		self.end = end
 		self.map_with_path = {}
 		self.path = []
-		self.debug_option = debug
+
+	def mapfile_to_list(self, mapfile):
+		tmp_list = []
+		for line in mapfile:
+			map_line = []
+			map_line = list(line)
+			tmp_list.append(map_line)
+		return tmp_list
 
 	def debug(self, value, label=''):
 		if self.debug_option == True:
