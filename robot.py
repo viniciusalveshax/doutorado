@@ -1,5 +1,4 @@
 import pygame
-import imageio as iio
 from PIL import Image
 import numpy as np
 
@@ -18,20 +17,6 @@ def draw_red_square(new_x, new_y):
 	x = new_x
 	y = new_y
 
-def draw_map(img_map):
-	base_x = 0
-	base_y = 0
-	y = base_y
-	for line in img_map:
-		x = 0
-		for pixel in line:
-			square = pygame.Rect(base_x + x, y, size, size)
-			pygame.draw.rect(screen, pixel, square, 0)
-			x = x + 1
-			#print(x, y)
-		y = y + 1
-				
-
 # pygame setup
 pygame.init()
 screen = pygame.display.set_mode((720, 720))
@@ -44,16 +29,12 @@ x = screen.get_width() / 2
 y = screen.get_height() / 2
 size = 30
 
-img_map = iio.imread(uri="map.bmp")
-print(img_map)
-draw_map(img_map)
-
-#img = Image.open("map.bmp")
-#img_np = np.array(img)
+img = Image.open("map.bmp")
+img_np = np.array(img)
 #print(img_np.shape)
 #print(img_np.ndim)
-#surf = pygame.surfarray.make_surface(img_np)
-#screen.blit(surf, (0, 0))
+surf = pygame.surfarray.make_surface(img_np)
+screen.blit(surf, (0, 0))
 
 draw_red_square(x, y)
 
