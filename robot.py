@@ -1,5 +1,22 @@
 import pygame
 import imageio as iio
+from PIL import Image
+import numpy as np
+
+def draw_red_square(new_x, new_y):
+	global x, y
+
+	#Desenha um quadrado branco na posição anterior
+	white_square = pygame.Rect(x, y, size, size)
+	pygame.draw.rect(screen, "white", white_square, 0)
+	
+	#Redesenha o quadrado na posição atualizada
+	red_square = pygame.Rect(new_x, new_y, size, size)
+	pygame.draw.rect(screen, "red", red_square, 0)
+
+	#Atualiza as variáveis globais de posição
+	x = new_x
+	y = new_y
 
 def draw_map(img_map):
 	base_x = 0
@@ -28,9 +45,17 @@ y = screen.get_height() / 2
 size = 30
 
 img_map = iio.imread(uri="map.bmp")
-#print(img_map)
-
+print(img_map)
 draw_map(img_map)
+
+#img = Image.open("map.bmp")
+#img_np = np.array(img)
+#print(img_np.shape)
+#print(img_np.ndim)
+#surf = pygame.surfarray.make_surface(img_np)
+#screen.blit(surf, (0, 0))
+
+draw_red_square(x, y)
 
 paused = False
 
@@ -47,28 +72,20 @@ while running:
 	position = pygame.Vector2(x, y)
 
 	# Draw a square
-	square = pygame.Rect(x, y, size, size)
-	pygame.draw.rect(screen, "red", square, 0)
+	#square = pygame.Rect(x, y, size, size)
+	#pygame.draw.rect(screen, "red", square, 0)
 
 	keys = pygame.key.get_pressed()
 
 	if paused == False:
 		if keys[pygame.K_w]:
-			square = pygame.Rect(x, y, size, size)
-			pygame.draw.rect(screen, "white", square, 0)
-			y -= size * dt
-		if keys[pygame.K_s]:
-			square = pygame.Rect(x, y, size, size)
-			pygame.draw.rect(screen, "white", square, 0)
-			y += size * dt
-		if keys[pygame.K_a]:
-			square = pygame.Rect(x, y, size, size)
-			pygame.draw.rect(screen, "white", square, 0)
-			x -= size * dt
-		if keys[pygame.K_d]:
-			square = pygame.Rect(x, y, size, size)
-			pygame.draw.rect(screen, "white", square, 0)
-			x += size * dt
+			draw_red_square(x, y - size*dt)
+		elif keys[pygame.K_s]:
+			draw_red_square(x, y + size*dt)
+		elif keys[pygame.K_a]:
+			draw_red_square(x - size*dt, y)
+		elif keys[pygame.K_d]:
+			draw_red_square(x + size*dt, y)
 
 	if keys[pygame.K_p]:
 		if paused:
