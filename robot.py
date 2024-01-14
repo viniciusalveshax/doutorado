@@ -31,10 +31,9 @@ def read_keyboard():
 			x_destination = int(x_destination)
 			y_destination = int(y_destination)
 			print("Moving to x:", x_destination, ", y:", y_destination)
-			new_np = draw_destination(x_destination, y_destination)
-			surf = pygame.surfarray.make_surface(new_np)
+			draw_destination(x_destination, y_destination)
+			surf = pygame.surfarray.make_surface(img_np)
 			screen.blit(surf, (0, 0))
-
 		elif keyboard_input[0] == "t":
 			img_np[1:100,1:100] = (0, 255, 255)
 			#img_np[:, :, 3] = (255, 255, 0)
@@ -47,10 +46,10 @@ def read_keyboard():
 
 
 def draw_destination(x, y):
-	global size, img_np, screen
+	global size, img_np
 	#print(type(x), type(y))
 	img_np[x:x+size, y:y+size] = (0, 255, 255)
-	return img_np
+#	return img_np
 
 
 def draw_red_square(new_x, new_y):
