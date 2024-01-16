@@ -1,6 +1,7 @@
 import pygame
 from PIL import Image
 import numpy as np
+from astar import AStar
 
 #Para leitura paralela do teclado
 import threading
@@ -34,6 +35,17 @@ def read_keyboard():
 			draw_destination(x_destination, y_destination)
 			surf = pygame.surfarray.make_surface(img_np)
 			screen.blit(surf, (0, 0))
+
+			maze = AStar(map=img_np, start=(x, y), end=(x_destination, y_destination), debug=True)
+			if maze.solve() == True:
+				print("Foi possível resolver")
+				#maze_path.print_map_with_solution()
+				maze_path = maze.get_path()
+				print(maze_path)
+				draw_path(maze_path)
+			else:
+				print("Não foi possível resolver")
+			
 		elif keyboard_input[0] == "t":
 			img_np[1:100,1:100] = (0, 255, 255)
 			#img_np[:, :, 3] = (255, 255, 0)
@@ -43,6 +55,16 @@ def read_keyboard():
 			img_np[:, ::3] = (255, 0, 255)
 			surf = pygame.surfarray.make_surface(img_np)
 			screen.blit(surf, (0, 0))
+
+def draw_path(path_list):
+	global img_np
+	tmp_size = 1
+	for node in path_list:
+		x, y = node
+		img_np[x:x+tmp_size, y:y+tmp_size] = (0, 255, 0)
+	surf = pygame.surfarray.make_surface(img_np)
+	screen.blit(surf, (0, 0))
+	
 
 def draw_square(x, y, color):
 	global img_np, size
