@@ -44,28 +44,49 @@ def read_keyboard():
 			surf = pygame.surfarray.make_surface(img_np)
 			screen.blit(surf, (0, 0))
 
+def draw_square(x, y, color):
+	global img_np, size
+
+	img_np[x:x+size, y:y+size] = color
+
 
 def draw_destination(x, y):
-	global size, img_np
+	global previous_x_destination, previous_y_destination, color_white, color_cyan
 	#print(type(x), type(y))
-	img_np[x:x+size, y:y+size] = (0, 255, 255)
-#	return img_np
+
+	if previous_y_destination != -1:
+		draw_square(previous_x_destination, previous_y_destination, color_white)
+
+	draw_square(x, y, color_cyan)
+
+	previous_x_destination = x
+	previous_y_destination = y
 
 
 def draw_red_square(new_x, new_y):
-	global x, y
+	global x, y, color_white, color_red
+	
+	new_x = int(new_x)
+	new_y = int(new_y)
 
 	#Desenha um quadrado branco na posição anterior
-	white_square = pygame.Rect(x, y, size, size)
-	pygame.draw.rect(screen, "white", white_square, 0)
+	draw_square(x, y, color_white)
 	
 	#Redesenha o quadrado na posição atualizada
-	red_square = pygame.Rect(new_x, new_y, size, size)
-	pygame.draw.rect(screen, "red", red_square, 0)
+	draw_square(new_x, new_y, color_red)
+
+	surf = pygame.surfarray.make_surface(img_np)
+	screen.blit(surf, (0, 0))
+
 
 	#Atualiza as variáveis globais de posição
 	x = new_x
 	y = new_y
+
+# Configura algumas cores comuns
+color_red = (255, 0, 0)
+color_white = (255, 255, 255)
+color_cyan = (0, 255, 255)
 
 # pygame setup
 pygame.init()
@@ -75,8 +96,8 @@ running = True
 dt = 0
 
 # Set 'robot' position and size
-x = screen.get_width() / 2
-y = screen.get_height() / 2
+x = int(screen.get_width() / 2)
+y = int(screen.get_height() / 2)
 size = 30
 
 # Lê o arquivo bmp e converte para numpy
@@ -91,19 +112,19 @@ screen.blit(surf, (0, 0))
 #Converte to pixel array para manipulação direta
 pxarray = pygame.PixelArray(surf)
 
-
-#imgsurface = pygame.image.load('empty_map.bmp')
-#rgbarray = pygame.surfarray.pixels3d(surf)
-
-
 #Faz o desenho inicial para não começar sem o quadrado
 draw_red_square(x, y)
 
+#Inicia a thread de leitura do teclado - Faz isso separadamente para não atrapalhar o gameloop
 keyboard_thread = threading.Thread(target=read_keyboard)
 keyboard_thread.start()
 
 #Inicialmente o programa não está pausado
 paused = False
+
+#Indica que inicialmente a localização do destino é inválida (não desenhar sobre a posição antiga)
+previous_x_destination = -1
+previous_y_destination = -1
 
 while running:
 	# poll for events
