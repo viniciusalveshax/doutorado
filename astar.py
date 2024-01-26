@@ -1,4 +1,5 @@
 import io
+import numpy
 
 class AStar:
 
@@ -18,6 +19,9 @@ class AStar:
 			self.map = self.mapfile_to_list(map_file)
 		elif isinstance(map, list):
 			self.debug("Map argument is of type List")
+			self.map = map
+		elif isinstance(map, numpy.ndarray):
+			self.debug("Map argument is of type numpy array")
 			self.map = map
 		else:
 			self.debug("Invalid map")
