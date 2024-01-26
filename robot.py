@@ -1,10 +1,78 @@
 import pygame
+
+# To use math.ceil
+import math 
+
 from PIL import Image
 import numpy as np
 from astar import AStar
 
 #Para leitura paralela do teclado
 import threading
+
+def visible(img_np, x, y, scale):
+	next_x = x + scale;
+	next_y = y + scale;
+	right_visible = True
+	down_visible = True
+	tmp_y = y
+
+	while (tmp_y <= next_y):
+		if np.array_equal(img_np[x][tmp_y], color_black):
+			right_visible = False
+			break
+		tmp_y = tmp_y + 1
+
+	tmp_x = x
+	while (tmp_x <= next_x):
+		if np.array_equal(img_np[tmp_x][y], color_black):
+			down_visible = False
+			break
+		tmp_x = tmp_x + 1
+
+	
+	if right_visible == False or down_visible == False:
+		print("R V, D V", right_visible, down_visible)
+	
+	return right_visible, down_visible
+
+def generate_minimap(img_np, scale):
+	img_x_size, img_y_size, img_z_size = img_np.shape
+
+	# Minimap tem tamanho dobrado pois é necessário salvar a informação se os
+	# pilares conseguem ver-se mutuamente
+	minimap_x_data = math.ceil(img_x_size/scale)
+	minimap_x_size = minimap_x_data * 2
+	minimap_y_data = math.ceil(img_y_size/scale)
+	minimap_y_size = minimap_y_data * 2
+
+	# Cria uma matriz de amostragem
+	minimap = np.ones((minimap_x_size, minimap_y_size, img_z_size))
+
+	x = 0
+	y = 0		
+	while x < minimap_x_data:
+		while y < minimap_y_data:
+			#print("X, y", x, y, x*scale, y*scale, minimap_x_size, minimap_y_size)
+			minimap[x*2][y*2] = img_np[x*scale][y*scale]
+			#print("Color minimap", minimap[x*2][y*2])
+			right, down = visible(img_np, x, y, scale)
+			if right:
+				minimap[(x*2)+1][y*2] = np.array(color_white)
+			else:
+				minimap[(x*2)+1][y*2] = np.array(color_black)
+			if down:
+				minimap[x*2][(y*2)+1] = np.array(color_white)
+			else:
+				minimap[x*2][(y*2)+1] = np.array(color_black)
+
+			minimap[(x*2)+1][(y*2)+1] = np.array(color_white)
+			y = y + 1
+		x = x + 1
+		y = 0
+
+	return minimap
+
 
 def read_keyboard():
 	global running, x, y, img_np
@@ -109,6 +177,7 @@ def draw_red_square(new_x, new_y):
 color_red = (255, 0, 0)
 color_white = (255, 255, 255)
 color_cyan = (0, 255, 255)
+color_black = (0, 0, 0)
 
 # pygame setup
 pygame.init()
@@ -171,6 +240,17 @@ for room in rooms:
 for tmp_room_path in rooms_paths:
 	print("Chave ", tmp_room_path, ", valor ", rooms_paths[tmp_room_path])
 
+# Quanto deve ser a escala da amostragem do mapa para acelerar o A*?
+# Ex: Amostragem de 1:10 então scale=10
+scale = 20
+minimap = generate_minimap(img_np, scale)
+surf = pygame.surfarray.make_surface(minimap)
+screen.blit(surf, (0, 0))
+
+print(img_np.shape, minimap.shape)
+print(img_np[0][0], minimap[0][0])
+data = Image.fromarray(minimap.astype(np.uint8)) 
+data.save('minimap.bmp') 
 
 while running:
 	# poll for events
