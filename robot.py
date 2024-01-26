@@ -123,7 +123,7 @@ y = int(screen.get_height() / 2)
 size = 30
 
 # Lê o arquivo bmp e converte para numpy
-img = Image.open("empty_map.bmp")
+img = Image.open("map.bmp")
 img_np = np.array(img)
 print(img_np.shape)
 
@@ -147,6 +147,30 @@ paused = False
 #Indica que inicialmente a localização do destino é inválida (não desenhar sobre a posição antiga)
 previous_x_destination = -1
 previous_y_destination = -1
+
+# Define um conjunto com as 6 salas. Cada sala é indicada por uma cor
+# vermelho, verde, azul, ciano, amarelo e magenta
+rooms = {(0, 0, 255), (0, 255, 0), (255, 0, 0), (255, 255, 0), (255, 0, 255), (0, 255, 255)}
+rooms_paths = {}
+for room in rooms:
+	tmp_set = rooms - {room}
+	for tmp_room in tmp_set:
+		print("Room ", room, ", tmp_room ", tmp_room)
+		if room in rooms_paths and tmp_room in rooms_paths[room]:
+			print("Já foi calculado")
+		else:
+			if not room in rooms_paths:
+				rooms_paths[room] = {}
+			if not tmp_room in rooms_paths[room]:
+				rooms_paths[room][tmp_room] = "aaa"
+				if not tmp_room in rooms_paths:
+					rooms_paths[tmp_room] = {}
+				rooms_paths[tmp_room][room] = "-a"
+			
+
+for tmp_room_path in rooms_paths:
+	print("Chave ", tmp_room_path, ", valor ", rooms_paths[tmp_room_path])
+
 
 while running:
 	# poll for events
