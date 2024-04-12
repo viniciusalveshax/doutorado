@@ -27,22 +27,18 @@ def visible(tmp, x, y, scale):
 	if next_y >= img_y_size:
 		next_y = img_y_size - 1	
 
-	print("NP x:", x, " y:", y, " valor:", img_np[x][y])
+	#print("NP x:", x, " y:", y, " valor:", img_np[x][y])
 
 	while (tmp_y <= next_y):
-		if not np.array_equal(img_np[x][tmp_y], color_white):
-			print("Testando ", img_np[x][tmp_y])
 		# Se encontrou uma parede na direita então o vizinho não é visível
 		if np.array_equal(img_np[x][tmp_y], color_black):
 			right_visible = False
 			break
 		tmp_y = tmp_y + 1
-		print("tmp y ", tmp_y)
+		#print("tmp y ", tmp_y)
 
 	tmp_x = x
 	while (tmp_x <= next_x):
-		if not np.array_equal(img_np[tmp_x][y], color_white):
-			print("Testando ", img_np[tmp_x][y])
 		# Se encontrou uma parede abaixo então o vizinho não é visível
 		if np.array_equal(img_np[tmp_x][y], color_black):
 			down_visible = False
@@ -50,8 +46,8 @@ def visible(tmp, x, y, scale):
 		tmp_x = tmp_x + 1
 
 	
-	if right_visible == False or down_visible == False:
-		print("R IV, D IV", right_visible, down_visible)
+	#if right_visible == False or down_visible == False:
+	#	print("R IV, D IV", right_visible, down_visible)
 	
 	return down_visible, right_visible
 
@@ -121,7 +117,7 @@ def read_keyboard():
 			y_destination = keyboard_input[2]
 			x_destination = int(x_destination)
 			y_destination = int(y_destination)
-			print("Moving to x:", x_destination, ", y:", y_destination)
+			#print("Moving to x:", x_destination, ", y:", y_destination)
 			draw_destination(x_destination, y_destination)
 			surf = pygame.surfarray.make_surface(img_np)
 			screen.blit(surf, (0, 0))
@@ -135,6 +131,26 @@ def read_keyboard():
 				draw_path(maze_path)
 			else:
 				print("Não foi possível resolver")
+
+		# Goto on minimap
+		elif keyboard_input[0] == "goto2":
+			x_destination = keyboard_input[1]
+			y_destination = keyboard_input[2]
+			x_destination = int(x_destination)
+			y_destination = int(y_destination)
+			x_dest_minimaze = int(x_destination/scale)
+			y_dest_minimaze = int(y_destination/scale)						
+		
+			maze = AStar(map=minimap, start=(x_minimap, y_minimap), end=(x_dest_minimaze, y_dest_minimaze), debug=True)
+			if maze.solve() == True:
+				print("Foi possível resolver")
+				#maze_path.print_map_with_solution()
+				maze_path = maze.get_path()
+				print(maze_path)
+				draw_path(maze_path)
+			else:
+				print("Não foi possível resolver")
+		
 		
 		# Teste com quadrado cyano
 		elif keyboard_input[0] == "t":
@@ -215,10 +231,11 @@ x = int(screen.get_width() / 2)
 y = int(screen.get_height() / 2)
 size = 30
 
+
+
 # Lê o arquivo bmp e converte para numpy
 img = Image.open("map.bmp")
 img_np = np.array(img)
-print(img_np.shape)
 
 #Mostra o objeto numpy
 surf = pygame.surfarray.make_surface(img_np)
@@ -241,28 +258,31 @@ paused = False
 previous_x_destination = -1
 previous_y_destination = -1
 
+
+
 # Define um conjunto com as 6 salas. Cada sala é indicada por uma cor
 # vermelho, verde, azul, ciano, amarelo e magenta
-rooms = {(0, 0, 255), (0, 255, 0), (255, 0, 0), (255, 255, 0), (255, 0, 255), (0, 255, 255)}
-rooms_paths = {}
-for room in rooms:
-	tmp_set = rooms - {room}
-	for tmp_room in tmp_set:
-		print("Room ", room, ", tmp_room ", tmp_room)
-		if room in rooms_paths and tmp_room in rooms_paths[room]:
-			print("Já foi calculado")
-		else:
-			if not room in rooms_paths:
-				rooms_paths[room] = {}
-			if not tmp_room in rooms_paths[room]:
-				rooms_paths[room][tmp_room] = "aaa"
-				if not tmp_room in rooms_paths:
-					rooms_paths[tmp_room] = {}
-				rooms_paths[tmp_room][room] = "-a"
+#rooms = {(0, 0, 255), (0, 255, 0), (255, 0, 0), (255, 255, 0), (255, 0, 255), (0, 255, 255)}
+#rooms_paths = {}
+#for room in rooms:
+#	tmp_set = rooms - {room}
+#	for tmp_room in tmp_set:
+#		print("Room ", room, ", tmp_room ", tmp_room)
+#		if room in rooms_paths and tmp_room in rooms_paths[room]:
+#			print("Já foi calculado")
+#		else:
+#			if not room in rooms_paths:
+#				rooms_paths[room] = {}
+#			if not tmp_room in rooms_paths[room]:
+#				rooms_paths[room][tmp_room] = "aaa"
+#				if not tmp_room in rooms_paths:
+#					rooms_paths[tmp_room] = {}
+#				rooms_paths[tmp_room][room] = "-a"
 			
+#for tmp_room_path in rooms_paths:
+#	print("Chave ", tmp_room_path, ", valor ", rooms_paths[tmp_room_path])
 
-for tmp_room_path in rooms_paths:
-	print("Chave ", tmp_room_path, ", valor ", rooms_paths[tmp_room_path])
+
 
 # Quanto deve ser a escala da amostragem do mapa para acelerar o A*?
 # Ex: Amostragem de 1:10 então scale=10
@@ -271,8 +291,16 @@ minimap = generate_minimap(img_np, scale)
 surf = pygame.surfarray.make_surface(minimap)
 screen.blit(surf, (0, 0))
 
-print(img_np.shape, minimap.shape)
-print(img_np[0][0], minimap[0][0])
+x_minimap = int(x/scale)
+y_minimap = int(y/scale)
+print(minimap[x_minimap][y_minimap])
+
+print("x minimap ", x_minimap, " , y_minimap ", y_minimap)
+
+
+
+#print(img_np.shape, minimap.shape)
+#print(img_np[0][0], minimap[0][0])
 data = Image.fromarray(minimap.astype(np.uint8)) 
 data.save('minimap.bmp') 
 
@@ -302,7 +330,7 @@ while running:
 # Encerra a thread de leitura do teclado
 keyboard_thread.join()
 
-print(img_np)
+#print(img_np)
 
 # Encerra o programa
 pygame.quit()
