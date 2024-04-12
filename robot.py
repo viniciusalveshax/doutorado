@@ -1,7 +1,7 @@
 import pygame
 
 # To use math.ceil
-import math 
+import math
 
 from PIL import Image
 import numpy as np
@@ -10,21 +10,40 @@ from astar import AStar
 #Para leitura paralela do teclado
 import threading
 
-def visible(img_np, x, y, scale):
+def visible(tmp, x, y, scale):
+	global img_np
+
+	img_x_size, img_y_size, img_z_size = img_np.shape
+
+	x = x * scale
+	y = y * scale
 	next_x = x + scale;
 	next_y = y + scale;
 	right_visible = True
 	down_visible = True
 	tmp_y = y
+	if next_x >= img_x_size:
+		next_x = img_x_size - 1
+	if next_y >= img_y_size:
+		next_y = img_y_size - 1	
+
+	print("NP x:", x, " y:", y, " valor:", img_np[x][y])
 
 	while (tmp_y <= next_y):
+		if not np.array_equal(img_np[x][tmp_y], color_white):
+			print("Testando ", img_np[x][tmp_y])
+		# Se encontrou uma parede na direita então o vizinho não é visível
 		if np.array_equal(img_np[x][tmp_y], color_black):
 			right_visible = False
 			break
 		tmp_y = tmp_y + 1
+		print("tmp y ", tmp_y)
 
 	tmp_x = x
 	while (tmp_x <= next_x):
+		if not np.array_equal(img_np[tmp_x][y], color_white):
+			print("Testando ", img_np[tmp_x][y])
+		# Se encontrou uma parede abaixo então o vizinho não é visível
 		if np.array_equal(img_np[tmp_x][y], color_black):
 			down_visible = False
 			break
@@ -32,9 +51,9 @@ def visible(img_np, x, y, scale):
 
 	
 	if right_visible == False or down_visible == False:
-		print("R V, D V", right_visible, down_visible)
+		print("R IV, D IV", right_visible, down_visible)
 	
-	return right_visible, down_visible
+	return down_visible, right_visible
 
 def generate_minimap(img_np, scale):
 	img_x_size, img_y_size, img_z_size = img_np.shape
@@ -49,6 +68,9 @@ def generate_minimap(img_np, scale):
 	# Cria uma matriz de amostragem
 	minimap = np.ones((minimap_x_size, minimap_y_size, img_z_size))
 
+	light_grey = (150, 150, 150)
+	dark_grey = (50, 50, 50)
+
 	x = 0
 	y = 0		
 	while x < minimap_x_data:
@@ -58,15 +80,15 @@ def generate_minimap(img_np, scale):
 			#print("Color minimap", minimap[x*2][y*2])
 			right, down = visible(img_np, x, y, scale)
 			if right:
-				minimap[(x*2)+1][y*2] = np.array(color_white)
+				minimap[(x*2)+1][y*2] = np.array(light_grey)
 			else:
-				minimap[(x*2)+1][y*2] = np.array(color_black)
+				minimap[(x*2)+1][y*2] = np.array(dark_grey)
 			if down:
-				minimap[x*2][(y*2)+1] = np.array(color_white)
+				minimap[x*2][(y*2)+1] = np.array(light_grey)
 			else:
-				minimap[x*2][(y*2)+1] = np.array(color_black)
+				minimap[x*2][(y*2)+1] = np.array(dark_grey)
 
-			minimap[(x*2)+1][(y*2)+1] = np.array(color_white)
+			minimap[(x*2)+1][(y*2)+1] = np.array(color_black)
 			y = y + 1
 		x = x + 1
 		y = 0
@@ -84,7 +106,7 @@ def read_keyboard():
 		keyboard_input = keyboard_input.split()
 		#print(keyboard_input)
 
-		if keyboard_input[0] == "q":
+		if keyboard_input[0] == "q" or keyboard_input[0] == "quit" or keyboard_input[0] == "exit":
 			running = False
 		elif keyboard_input[0] == "w":
 			draw_red_square(x, y - size*dt)
@@ -113,12 +135,14 @@ def read_keyboard():
 				draw_path(maze_path)
 			else:
 				print("Não foi possível resolver")
-			
+		
+		# Teste com quadrado cyano
 		elif keyboard_input[0] == "t":
 			img_np[1:100,1:100] = (0, 255, 255)
 			#img_np[:, :, 3] = (255, 255, 0)
 			surf = pygame.surfarray.make_surface(img_np)
 			screen.blit(surf, (0, 0))
+		# Teste com linhas vermelhas
 		elif keyboard_input[0] == "y":
 			img_np[:, ::3] = (255, 0, 255)
 			surf = pygame.surfarray.make_surface(img_np)
@@ -252,6 +276,8 @@ print(img_np[0][0], minimap[0][0])
 data = Image.fromarray(minimap.astype(np.uint8)) 
 data.save('minimap.bmp') 
 
+
+
 while running:
 	# poll for events
 	# pygame.QUIT event means the user clicked X to close your window
@@ -275,6 +301,8 @@ while running:
 
 # Encerra a thread de leitura do teclado
 keyboard_thread.join()
+
+print(img_np)
 
 # Encerra o programa
 pygame.quit()
