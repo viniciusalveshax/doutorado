@@ -10,6 +10,7 @@ from astar import AStar
 #Para leitura paralela do teclado
 import threading
 
+#Determine if the neighboors are visible from a arbitrary point
 def visible(tmp, x, y, scale):
 	global img_np
 
@@ -51,6 +52,7 @@ def visible(tmp, x, y, scale):
 	
 	return down_visible, right_visible
 
+#Generate and return a minimap create from original map
 def generate_minimap(img_np, scale):
 	img_x_size, img_y_size, img_z_size = img_np.shape
 
@@ -91,7 +93,7 @@ def generate_minimap(img_np, scale):
 
 	return minimap
 
-
+#Keyboard thread that read the keyboard and do something
 def read_keyboard():
 	global running, x, y, img_np
 
@@ -112,12 +114,15 @@ def read_keyboard():
 			draw_red_square(x - size*dt, y)
 		elif keyboard_input[0] == "d":
 			draw_red_square(x + size*dt, y)
+		
 		elif keyboard_input[0] == "goto":
 			x_destination = keyboard_input[1]
 			y_destination = keyboard_input[2]
 			x_destination = int(x_destination)
 			y_destination = int(y_destination)
 			#print("Moving to x:", x_destination, ", y:", y_destination)
+
+			#Draw path
 			draw_destination(x_destination, y_destination)
 			surf = pygame.surfarray.make_surface(img_np)
 			screen.blit(surf, (0, 0))
@@ -164,6 +169,7 @@ def read_keyboard():
 			surf = pygame.surfarray.make_surface(img_np)
 			screen.blit(surf, (0, 0))
 
+#Draw a possible path
 def draw_path(path_list):
 	global img_np
 	tmp_size = 1
