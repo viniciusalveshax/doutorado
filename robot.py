@@ -93,6 +93,57 @@ def generate_minimap(img_np, scale):
 
 	return minimap
 
+def draw_line(point1, point2):
+	global screen, surf, scale
+
+	x1,y1 = point1
+	x2,y2 = point2
+
+	print("Desenhando reta de ", point1, " até ", point2)
+	pygame.draw.line(screen, 'red', (x1*scale, y1*scale), (x2*scale, y2*scale), width = 3)
+	#screen.blit(surf, (0, 0))
+
+
+def draw_minimap_path(minimap_path):
+	global scale
+
+	resumed_path = []
+
+	old_x = False
+	old_y = False
+	previous_direction = False
+
+	for point in minimap_path:
+		# Se é a primeira vez no loop só salva os valores pra próxima iteração
+		if old_x == False:
+			old_x, old_y = point
+			continue
+		else:
+			# Se já não é a primeira vez então testa se algum dos pontos mudou
+			new_x, new_y = point
+			if new_x == old_x:
+				direction = "horizontal"
+			else:
+				direction = "vertical"
+			
+			if direction != previous_direction:
+				print(old_x, old_y)
+				resumed_path.append((old_x*scale, old_y*scale))
+			
+			old_x, old_y = new_x, new_y
+			previous_direction = direction
+
+
+	last_point = minimap_path[-1]
+	x_last_point, y_last_point = last_point
+
+	resumed_path.append((x_last_point*scale, y_last_point*scale))
+
+	print(resumed_path)
+
+	pygame.draw.lines(screen, 'red', False, resumed_path, width = 3)
+
+
 #Keyboard thread that read the keyboard and do something
 def read_keyboard():
 	global running, x, y, img_np
@@ -138,7 +189,7 @@ def read_keyboard():
 				print("Não foi possível resolver")
 
 		# Goto on minimap
-		elif keyboard_input[0] == "goto2":
+		elif keyboard_input[0] == "gotomini":
 			x_destination = keyboard_input[1]
 			y_destination = keyboard_input[2]
 			x_destination = int(x_destination)
@@ -153,6 +204,7 @@ def read_keyboard():
 				maze_path = maze.get_path()
 				print(maze_path)
 				draw_path(maze_path)
+				draw_minimap_path(maze_path)
 			else:
 				print("Não foi possível resolver")
 		
