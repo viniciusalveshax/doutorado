@@ -139,10 +139,8 @@ def draw_minimap_path(minimap_path):
 
 	resumed_path.append((x_last_point*scale, y_last_point*scale))
 	
-	resumed_path = [(360, 360), (340, 360), (340, 320), (200, 320), (200, 200)]
-
-
-	print(resumed_path)
+	if debug_level == 2:
+		print(resumed_path)
 
 	pygame.draw.lines(screen, 'red', False, resumed_path, width = 3)
 
@@ -202,10 +200,13 @@ def read_keyboard():
 		
 			maze = AStar(map=minimap, start=(x_minimap, y_minimap), end=(x_dest_minimaze, y_dest_minimaze), debug=False)
 			if maze.solve() == True:
-				print("Foi possível resolver")
 				#maze_path.print_map_with_solution()
 				maze_path = maze.get_path()
-				#print(maze_path)
+	
+				# Se não adicionar a posição inicial não vai desenhar a última linha até o robô pois existe uma descontinuidade na amostragem
+				maze_path = [(x_minimap, y_minimap)] + maze_path
+				if debug_level==2:
+					print("Foi possível resolver. Maze path: ", maze_path)
 				draw_path(maze_path)
 				draw_minimap_path(maze_path)
 			else:
@@ -277,7 +278,7 @@ def draw_red_square(new_x, new_y):
 	y = new_y
 
 # 0: none, 1: minimal, 2: maximal
-debug_level = 1
+debug_level = 2
 
 # Configura algumas cores comuns
 color_red = (255, 0, 0)
