@@ -278,7 +278,7 @@ def draw_red_square(new_x, new_y):
 	y = new_y
 
 # 0: none, 1: minimal, 2: maximal
-debug_level = 2
+debug_level = 0
 
 # Configura algumas cores comuns
 color_red = (255, 0, 0)
