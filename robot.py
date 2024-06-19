@@ -138,6 +138,9 @@ def draw_minimap_path(minimap_path):
 	x_last_point, y_last_point = last_point
 
 	resumed_path.append((x_last_point*scale, y_last_point*scale))
+	
+	resumed_path = [(360, 360), (340, 360), (340, 320), (200, 320), (200, 200)]
+
 
 	print(resumed_path)
 
@@ -197,12 +200,12 @@ def read_keyboard():
 			x_dest_minimaze = int(x_destination/scale)
 			y_dest_minimaze = int(y_destination/scale)						
 		
-			maze = AStar(map=minimap, start=(x_minimap, y_minimap), end=(x_dest_minimaze, y_dest_minimaze), debug=True)
+			maze = AStar(map=minimap, start=(x_minimap, y_minimap), end=(x_dest_minimaze, y_dest_minimaze), debug=False)
 			if maze.solve() == True:
 				print("Foi possível resolver")
 				#maze_path.print_map_with_solution()
 				maze_path = maze.get_path()
-				print(maze_path)
+				#print(maze_path)
 				draw_path(maze_path)
 				draw_minimap_path(maze_path)
 			else:
@@ -261,6 +264,8 @@ def draw_red_square(new_x, new_y):
 	draw_square(x, y, color_white)
 	
 	#Redesenha o quadrado na posição atualizada
+	if debug_level == 1:
+		print("Drawing red square at x:", x, " y: ", y) 
 	draw_square(new_x, new_y, color_red)
 
 	surf = pygame.surfarray.make_surface(img_np)
@@ -270,6 +275,9 @@ def draw_red_square(new_x, new_y):
 	#Atualiza as variáveis globais de posição
 	x = new_x
 	y = new_y
+
+# 0: none, 1: minimal, 2: maximal
+debug_level = 1
 
 # Configura algumas cores comuns
 color_red = (255, 0, 0)
@@ -346,6 +354,9 @@ previous_y_destination = -1
 # Ex: Amostragem de 1:10 então scale=10
 scale = 20
 minimap = generate_minimap(img_np, scale)
+if debug_level == 2:
+	print("Minimap array: ")
+	print(minimap)
 surf = pygame.surfarray.make_surface(minimap)
 screen.blit(surf, (0, 0))
 
