@@ -143,7 +143,43 @@ def draw_minimap_path(minimap_path):
 		print(resumed_path)
 
 	pygame.draw.lines(screen, 'red', False, resumed_path, width = 3)
+	
+	return resumed_path
 
+
+def move_to_position(next_position):
+	global x,y
+	
+	delta = 5
+
+	next_x, next_y = next_position
+
+	# Descubre se o movimento até a próxima posição é na horizontal ou na vertical	
+	if x == next_x:
+		delta_x = 0
+		if y > next_y:
+			delta_y = -delta
+		else:
+			delta_y = delta
+	else:
+		delta_y = 0
+		if x > next_x:
+			delta_x = -delta
+		else:
+			delta_x = delta
+		
+		
+	
+	while((x,y) != next_position):
+		pygame.time.wait(500)
+		x = x + delta_x
+		y = y + delta_y
+					
+		draw_red_square(x, y)
+
+def follow_path(minimap_path):
+	for position in minimap_path:
+		move_to_position(position)
 
 #Keyboard thread that read the keyboard and do something
 def read_keyboard():
@@ -198,6 +234,9 @@ def read_keyboard():
 			x_dest_minimaze = int(x_destination/scale)
 			y_dest_minimaze = int(y_destination/scale)						
 		
+			x_minimap = int(x/scale)
+			y_minimap = int(y/scale)
+		
 			maze = AStar(map=minimap, start=(x_minimap, y_minimap), end=(x_dest_minimaze, y_dest_minimaze), debug=False)
 			if maze.solve() == True:
 				#maze_path.print_map_with_solution()
@@ -208,7 +247,9 @@ def read_keyboard():
 				if debug_level==2:
 					print("Foi possível resolver. Maze path: ", maze_path)
 				draw_path(maze_path)
-				draw_minimap_path(maze_path)
+				resumed_path = draw_minimap_path(maze_path)
+				
+				follow_path(resumed_path)
 			else:
 				print("Não foi possível resolver")
 		
@@ -238,6 +279,10 @@ def draw_path(path_list):
 
 def draw_square(x, y, color):
 	global img_np, size
+	
+	#Centraliza o robô
+	x = int(x - size/2)
+	y = int(y - size/2)
 
 	img_np[x:x+size, y:y+size] = color
 
@@ -272,13 +317,12 @@ def draw_red_square(new_x, new_y):
 	surf = pygame.surfarray.make_surface(img_np)
 	screen.blit(surf, (0, 0))
 
-
 	#Atualiza as variáveis globais de posição
 	x = new_x
 	y = new_y
 
 # 0: none, 1: minimal, 2: maximal
-debug_level = 0
+debug_level = 1
 
 # Configura algumas cores comuns
 color_red = (255, 0, 0)
@@ -293,11 +337,12 @@ clock = pygame.time.Clock()
 running = True
 dt = 0
 
-# Set 'robot' position and size
-x = int(screen.get_width() / 2)
-y = int(screen.get_height() / 2)
+# Tamanho padrão do "robô"
 size = 30
 
+# Define a posição do robô na tela 
+x = int(screen.get_width() / 2)
+y = int(screen.get_height() / 2)
 
 
 # Lê o arquivo bmp e converte para numpy
