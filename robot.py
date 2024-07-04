@@ -146,7 +146,6 @@ def draw_minimap_path(minimap_path):
 	
 	return resumed_path
 
-
 def move_to_position(next_position):
 	global x,y
 	
@@ -172,10 +171,16 @@ def move_to_position(next_position):
 	
 	while((x,y) != next_position):
 		pygame.time.wait(500)
+		
+		reset_background()
+#		draw_square(x, y, color_white)
 		x = x + delta_x
 		y = y + delta_y
-					
 		draw_red_square(x, y)
+
+def reset_background():
+	global img_np, start_background
+	img_np = np.copy(start_background)
 
 def follow_path(minimap_path):
 	for position in minimap_path:
@@ -277,6 +282,7 @@ def draw_path(path_list):
 	screen.blit(surf, (0, 0))
 	
 
+
 def draw_square(x, y, color):
 	global img_np, size
 	
@@ -301,7 +307,7 @@ def draw_destination(x, y):
 
 
 def draw_red_square(new_x, new_y):
-	global x, y, color_white, color_red
+	global x, y, color_white, color_red, img_np
 	
 	new_x = int(new_x)
 	new_y = int(new_y)
@@ -348,6 +354,7 @@ y = int(screen.get_height() / 2)
 # Lê o arquivo bmp e converte para numpy
 img = Image.open("map.bmp")
 img_np = np.array(img)
+start_background = np.copy(img_np)
 
 #Mostra o objeto numpy
 surf = pygame.surfarray.make_surface(img_np)
