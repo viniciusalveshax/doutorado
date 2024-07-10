@@ -20,6 +20,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'map_server = map_share.map_server:main',
+            'map_client = map_share.map_client:main',
         ],
     },
 )
