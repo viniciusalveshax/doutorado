@@ -3,6 +3,7 @@ from map_interfaces.srv import GetRand
 import rclpy
 from rclpy.node import Node
 
+import random
 
 class MinimalService(Node):
 
@@ -14,7 +15,8 @@ class MinimalService(Node):
         #response.sum = request.a + request.b
         #self.get_logger().info('Incoming request\na: %d b: %d' % (request.a, request.b))
 
-        response.sum = 1
+	# Retorna como resposta um número aleatório entre 0 e 99
+        response.sum = random.randint(0, 99)
 
         return response
 
