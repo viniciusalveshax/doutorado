@@ -22,6 +22,8 @@ setup(
         'console_scripts': [
             'server = map_share.map_server:main',
             'client = map_share.map_client:main',
+            'rand_server = map_share.map_rand_server:main',
+            'rand_client = map_share.map_rand_client:main',            
         ],
     },
 )
