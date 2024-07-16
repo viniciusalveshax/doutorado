@@ -23,7 +23,9 @@ setup(
             'server = map_share.map_server:main',
             'client = map_share.map_client:main',
             'rand_server = map_share.map_rand_server:main',
-            'rand_client = map_share.map_rand_client:main',            
+            'rand_client = map_share.map_rand_client:main',
+            'publisher = map_share.map_publisher:main',
+            'subscriber = map_share.map_subscriber:main',
         ],
     },
 )
