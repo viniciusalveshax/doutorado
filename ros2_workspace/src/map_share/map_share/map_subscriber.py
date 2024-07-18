@@ -17,6 +17,8 @@ class MinimalSubscriber(Node):
 
     def listener_callback(self, msg):
         self.get_logger().info('I heard: "%s"' % msg.timestamp)
+        if msg.timestamp != last_timestamp:
+        	print("Timestamp change ...")
 
 
 def main(args=None):
@@ -35,3 +37,5 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
+    
+last_timestamp = ""
