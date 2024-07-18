@@ -1,41 +1,42 @@
-import rclpy
-from rclpy.node import Node
+#Base code from https://answers.ros.org/question/337870/ros2-how-do-i-publish-exactly-one-message/
 
-#from std_msgs.msg import String
+from time import sleep
+
+import rclpy
+import random
+
 from map_interfaces.msg import GetMapInfo
 
-class MinimalPublisher(Node):
-
-    def __init__(self):
-        super().__init__('minimal_publisher')
-        self.publisher_ = self.create_publisher(GetMapInfo, 'map_info', 10)
-        timer_period = 0.5  # seconds
-        self.timer = self.create_timer(timer_period, self.timer_callback)
-        self.i = 0
-
-    def timer_callback(self):
-        msg = GetMapInfo()
-        msg.timestamp = 'Hello World: %d' % self.i
-        msg.height = 100
-        msg.width = 100
-        self.publisher_.publish(msg)
-        self.get_logger().info('Publishing: "%s"' % msg.timestamp)
-        self.i += 1
-
-
 def main(args=None):
-    rclpy.init(args=args)
+  rclpy.init(args=args)
 
-    minimal_publisher = MinimalPublisher()
+  node = rclpy.create_node('minimal_publisher')
 
-    rclpy.spin(minimal_publisher)
+  publisher_map_info = node.create_publisher(GetMapInfo, '/map_info', 10)
+ 
 
-    # Destroy the node explicitly
-    # (optional - otherwise it will be done automatically
-    # when the garbage collector destroys the node object)
-    minimal_publisher.destroy_node()
-    rclpy.shutdown()
+  i = 0
+  msg = GetMapInfo()
+  while rclpy.ok():
+    
+    # Simula um padrão aleatório de publicação    
+    rand_int = random.randint(0, 10)
+    print("Rand Int ", rand_int)    
+    if rand_int < 1:
+        
+        msg.timestamp = 'Hello World: %d' % i
+        print("Vou publicar ", msg.timestamp)
+        i += 1
+        publisher_map_info.publish(msg)
 
+    sleep(1.0)  # seconds
+
+  # Destroy the node explicitly
+  # (optional - otherwise it will be done automatically
+  # when the garbage collector destroys the node object)
+  node.destroy_node()
+  rclpy.shutdown()
 
 if __name__ == '__main__':
-    main()
+  main()
+
