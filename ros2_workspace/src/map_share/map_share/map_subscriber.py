@@ -4,34 +4,29 @@ from rclpy.node import Node
 #from std_msgs.msg import String
 from map_interfaces.msg import GetMapInfo
 
-class MinimalSubscriber(Node):
+def map_info_callback(msg):
+    global last_timestamp
+    if msg.timestamp != last_timestamp:
+        last_timestamp = msg.timestamp
+        print("Timestamp mudou para ", last_timestamp) 
 
-    def __init__(self):
+class Subscriber(Node):
+    def __init__(self, topic_name, callback_function):
         super().__init__('minimal_subscriber')
         self.subscription = self.create_subscription(
             GetMapInfo,
-            '/map_info',
-            self.listener_callback,
+            topic_name,
+            callback_function,
             10)
         self.subscription  # prevent unused variable warning
-
-    def listener_callback(self, msg):
-        self.get_logger().info('I heard: "%s"' % msg.timestamp)
-        if msg.timestamp != last_timestamp:
-        	print("Timestamp change ...")
-
 
 def main(args=None):
     rclpy.init(args=args)
 
-    minimal_subscriber = MinimalSubscriber()
-
-    rclpy.spin(minimal_subscriber)
-
-    # Destroy the node explicitly
-    # (optional - otherwise it will be done automatically
-    # when the garbage collector destroys the node object)
-    minimal_subscriber.destroy_node()
+    sub = Subscriber('/map_info', map_info_callback)
+    rclpy.spin(sub)
+    
+    sub.destroy_node()
     rclpy.shutdown()
 
 
