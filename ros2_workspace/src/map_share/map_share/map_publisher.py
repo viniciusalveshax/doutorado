@@ -3,6 +3,7 @@
 from time import sleep
 
 import rclpy
+from rclpy.node import Node
 
 # Somente para testes iniciais
 import random
@@ -10,7 +11,24 @@ import random
 # Para gerar o timestamp
 import time
 
-from map_interfaces.msg import GetMapInfo, GetMapData
+# Para lançar serviço
+import threading
+
+from map_interfaces.msg import GetMapInfo
+from map_interfaces.srv import GetMapData
+
+class MinimalService(Node):
+
+    def __init__(self):
+        super().__init__('minimal_service')
+        self.srv = self.create_service(GetMapData, 'get_map_data', self.get_map_data_callback)
+
+    def get_map_data_callback(self, request, response):
+        global map
+        response.data = map.content()
+        #self.get_logger().info('Incoming request\na: %d b: %d' % (request.a, request.b))
+
+        return response
 
 
 class Map:
@@ -39,10 +57,10 @@ class Map:
 def update_msg(node, map):
 
   publisher_map_info = node.create_publisher(GetMapInfo, '/map_info', 10)
-  publisher_map_data = node.create_publisher(GetMapData, '/map_data', 10) 
+  #publisher_map_data = node.create_publisher(GetMapData, '/map_data', 10) 
 
   map_info_msg = GetMapInfo()
-  map_data_msg = GetMapData()
+  #map_data_msg = GetMapData()
 
   i = int(time.time())
   #TODO Mudar tipo de dado para mandar int logo
@@ -51,10 +69,15 @@ def update_msg(node, map):
   map_info_msg.height = map.height
   print("Vou publicar ", map_info_msg.timestamp)
         
-  map_data_msg.data = map.content2str()
+  #map_data_msg.data = map.content2str()
        
   publisher_map_info.publish(map_info_msg)
-  publisher_map_data.publish(map_data_msg)
+  #publisher_map_data.publish(map_data_msg)
+
+
+def map_service():
+  minimal_service = MinimalService()
+  rclpy.spin(minimal_service)
 
 
 def main(args=None):
@@ -62,8 +85,9 @@ def main(args=None):
 
   node = rclpy.create_node('minimal_publisher')
 
-  map = Map('/home/vinicius/s/doutorado/map2.txt')
-
+  provide_map_service_thread = threading.Thread(target=map_service)
+  provide_map_service_thread.start()
+ 
   update_msg(node, map)
 
   while rclpy.ok():
@@ -76,11 +100,16 @@ def main(args=None):
 
     sleep(1.0)  # seconds
 
+  # Encerra a thread que provê o mapa
+  provide_map_service_thread.join()
+
   # Destroy the node explicitly
   # (optional - otherwise it will be done automatically
   # when the garbage collector destroys the node object)
   node.destroy_node()
   rclpy.shutdown()
+
+map = Map('/home/vinicius/s/doutorado/map2.txt')
 
 if __name__ == '__main__':
   main()
