@@ -26,6 +26,9 @@ class Map:
   def content(self):
     return self.file_content
     
+  def content2str(self):
+    return ''.join(self.file_content)
+    
   def width(self):
     return self.width
    
@@ -48,7 +51,7 @@ def update_msg(node, map):
   map_info_msg.height = map.height
   print("Vou publicar ", map_info_msg.timestamp)
         
-  map_data_msg.data = map.content
+  map_data_msg.data = map.content2str()
        
   publisher_map_info.publish(map_info_msg)
   publisher_map_data.publish(map_data_msg)
