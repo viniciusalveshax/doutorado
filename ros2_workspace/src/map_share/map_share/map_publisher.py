@@ -3,31 +3,66 @@
 from time import sleep
 
 import rclpy
+
+# Somente para testes iniciais
 import random
 
-from map_interfaces.msg import GetMapInfo
+# Para gerar o timestamp
+import time
+
+from map_interfaces.msg import GetMapInfo, GetMapData
+
+
+class Map:
+  def __init__(self, file_path):
+
+    self.file_content = []
+    tmp_file = open(file_path, 'r')
+    self.file_content = tmp_file.readlines()
+    
+    self.width = len(self.file_content[0])
+    self.height = len(self.file_content)
+    
+  def content(self):
+    return self.file_content
+    
+  def width(self):
+    return self.width
+   
+  def height(self):
+    return self.height
+
 
 def main(args=None):
   rclpy.init(args=args)
 
   node = rclpy.create_node('minimal_publisher')
 
-  publisher_map_info = node.create_publisher(GetMapInfo, '/map_info', 10)
- 
+  map = Map('/home/vinicius/s/doutorado/map2.txt')
 
-  i = 0
-  msg = GetMapInfo()
+  publisher_map_info = node.create_publisher(GetMapInfo, '/map_info', 10)
+  publisher_map_data = node.create_publisher(GetMapData, '/map_data', 10) 
+
+  map_info_msg = GetMapInfo()
+  map_data_msg = GetMapData()
   while rclpy.ok():
     
-    # Simula um padrão aleatório de publicação    
+    # Simula um padrão aleatório de alteração do mapa
     rand_int = random.randint(0, 10)
     print("Rand Int ", rand_int)    
     if rand_int < 1:
         
-        msg.timestamp = 'Hello World: %d' % i
-        print("Vou publicar ", msg.timestamp)
-        i += 1
-        publisher_map_info.publish(msg)
+        i = int(time.time())
+        #TODO Mudar tipo de dado para mandar int logo
+        map_info_msg.timestamp = '%d' % i
+        map_info_msg.width = map.width
+        map_info_msg.height = map.height
+        print("Vou publicar ", map_info_msg.timestamp)
+        
+        map_data_msg.data = '%d' % rand_int
+        
+        publisher_map_info.publish(map_info_msg)
+        publisher_map_data.publish(map_data_msg)
 
     sleep(1.0)  # seconds
 
