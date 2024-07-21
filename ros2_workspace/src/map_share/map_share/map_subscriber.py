@@ -20,7 +20,9 @@ def map_info_callback(msg):
         print("Aqui")
         print(type(response.data))
         #minimal_client.get_logger().info(response.data)
-        print(response.data)
+        #print(response.data)
+        map_formated = ''.join(response.data)
+        print(map_formated)
         minimal_client.destroy_node()
 
 
