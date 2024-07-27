@@ -9,7 +9,10 @@ from map_interfaces.msg import GetMapInfo #, GetMapData
 from map_interfaces.srv import GetMapData
 
 # Importa a classe que armazena o mapa
-from Map import Map
+import sys
+#TODO fazer isso dentro do padrão do ROS2
+sys.path.append('/home/vinicius/projetos/github/doutorado/ros2_workspace')
+from map import Map
 
 def map_data_callback(msg):
     print("Mapa agora é ", msg.data)
@@ -61,13 +64,28 @@ class Subscriber(Node):
 def map_read():
     map = Map('/home/vinicius/s/doutorado/map2.txt')
     
+    print("Lendo mapa")
+    minimal_client = MinimalClientAsync()
+    future = minimal_client.send_request()
+    rclpy.spin_until_future_complete(minimal_client, future)
+    print("Requisição concluída")
+    response = future.result()
+    minimal_client.get_logger().info(
+        'Resultado %s' %
+        (response.data))
+        
+    map.set_content(response.data)
+    map.show()
+
+    minimal_client.destroy_node()
+    
     print("Leu o mapa")
 
 def main(args=None):
     rclpy.init(args=args)
 
-    map_reader_thread = threading.Thread(target=map_read)
-    map_reader_thread.start()
+    #map_reader_thread = threading.Thread(target=map_read)
+    #map_reader_thread.start()
 
 
     sub1 = Subscriber('/map_info', map_info_callback)
@@ -78,7 +96,7 @@ def main(args=None):
     rclpy.shutdown()
 
     # Encerra a thread que lê o mapa
-    map_reader_thread.join()
+    #map_reader_thread.join()
 
 
 
