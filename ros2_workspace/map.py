@@ -30,11 +30,11 @@ class Map:
     for line in self.file_content:
       print(line, end='')
       
-  def put(self, x, y):
+  def put(self, x, y, char = '.'):
     tmp_line = self.file_content[x]
     
     #https://stackoverflow.com/questions/41752946/replacing-a-character-from-a-certain-index
-    tmp_line = tmp_line[:y] + '.' + tmp_line[y + 1:]
+    tmp_line = tmp_line[:y] + char + tmp_line[y + 1:]
     
     self.file_content[x] = tmp_line
     
