@@ -53,6 +53,15 @@ class Map:
   def height(self):
     return self.height
 
+  def show(self):
+    for line in self.file_content:
+      print(line, end='')
+      
+  def put(self, x, y):
+    tmp_line = self.file_content[x]
+    tmp_line[y] = '.'
+    self.file_content[x] = tmp_line
+
 
 def update_msg(node, map):
 
@@ -79,6 +88,18 @@ def map_service():
   minimal_service = MinimalService()
   rclpy.spin(minimal_service)
 
+def show_map():
+  global map
+  map.show()
+  
+
+def put_obstacle(keyboard_input_list):
+    print("Map before")
+    show_map()
+    x = int(keyboard_input_list[1])
+    y = int(keyboard_input_list[2])
+    print("Map after")
+    show_map()
 
 def main(args=None):
   rclpy.init(args=args)
@@ -90,15 +111,29 @@ def main(args=None):
  
   update_msg(node, map)
 
-  while rclpy.ok():
+  command = ''
+  while command != 'exit':
+
+    keyboard_input = input('Digite um comando')
+    keyboard_input = keyboard_input.split()
+    command = keyboard_input[0]
+    
+    if command == 'put':
+      put_obstacle(keyboard_input)
+      
+    print(command)
+      
+#  while rclpy.ok():
     
     # Simula um padrão aleatório de alteração do mapa
-    rand_int = random.randint(0, 10)
-    print("Rand Int ", rand_int)    
-    if rand_int <= 1:
-      update_msg(node, map)    
+    #rand_int = random.randint(0, 10)
+    #print("Rand Int ", rand_int)    
+    #if rand_int <= 1:
+    #  update_msg(node, map)    
 
-    sleep(1.0)  # seconds
+    #sleep(1.0)  # seconds
+
+  print("Saindo do loop")
 
   # Encerra a thread que provê o mapa
   provide_map_service_thread.join()
