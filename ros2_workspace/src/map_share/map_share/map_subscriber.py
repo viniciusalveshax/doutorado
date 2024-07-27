@@ -1,6 +1,9 @@
 import rclpy
 from rclpy.node import Node
 
+# Para usar o sleep
+from time import sleep
+
 # Para lançar thread que lê o mapa inicialmente
 import threading
 
@@ -9,18 +12,19 @@ from map_interfaces.msg import GetMapInfo #, GetMapData
 from map_interfaces.srv import GetMapData
 
 # Importa a classe que armazena o mapa
-import sys
+#import sys
 #TODO fazer isso dentro do padrão do ROS2
 #sys.path.append('/home/vinicius/projetos/github/doutorado/ros2_workspace')
 from map import Map
+from astar import AStar
 
 def map_data_callback(msg):
     print("Mapa agora é ", msg.data)
 
 
 def map_read():
-    global map
-    debug(map.version())
+    global shared_map, first_loading
+    debug(shared_map.version())
     
     debug("Lendo mapa")
     minimal_client = MinimalClientAsync()
@@ -32,8 +36,12 @@ def map_read():
     #    'Resultado %s' %
     #    (response.data))
         
-    map.set_content(response.data)
+    shared_map.set_content(response.data)
     #map.show()
+
+    #if first_loading == True:
+    shared_map.put(position[0], position[1], '*')
+    #first_loading = False
 
     minimal_client.destroy_node()
     
@@ -85,18 +93,58 @@ class Subscriber(Node):
             10)
         self.subscription  # prevent unused variable warning
 
-def goto(keyboard_input):
-    debug("Função goto")
+def follow_path(shared_map, planned_path):
+    global position 
+
+    while planned_path != []:
     
+    	# Bota um símbolo _ na posição antiga
+        shared_map.put(position[0], position[1], '_')
+        
+        # Pega a próxima posição
+        position = planned_path[0]
+        
+        # Muda o símbolo da próxima posição
+        shared_map.put(position[0], position[1], '*')
+        
+        # Mostra o mapa e espera um tempo
+        # (para a atualização não ser tão rápida)
+        shared_map.show()
+        sleep(3)
+        
+        # Passa para a próxima posição do caminho e repete
+        planned_path.pop(0)
+        
+    print("Cheguei")
+        
+
+def goto(keyboard_input):
+    global shared_map, position
+    debug("Função goto. Executando A*")
+    x_dest = int(keyboard_input[1])
+    y_dest = int(keyboard_input[2])
+    print("Posição",position)
+    maze = AStar(map=shared_map.content(), start=(position[0],position[1]), end=(x_dest, y_dest), debug=True)
+    if maze.solve() == True:
+        maze.print_map_with_solution()
+        planned_path = maze.get_path()
+        follow_path(shared_map, planned_path)
+    else:
+        debug("Mapa sem solução :(")
+    
+def show_map():
+    global shared_map
+    shared_map.show() 
+   
 def put(keyboard_input):
-    global map
+    global shared_map
     print("Função put")
     x = keyboard_input[1]
     y = keyboard_input[2]
     debug("Adicionando obstáculo no caminho do robô na posição x:"+x+", y:"+y)
-    map.show()
-    map.put(int(x), int(y))
-    map.show()
+    shared_map.show()
+    shared_map.put(int(x), int(y))
+    shared_map.show()
 
 def keyboard_reader():
     command = ''
@@ -110,6 +158,8 @@ def keyboard_reader():
             goto(keyboard_input)
         elif command == 'put':
             put(keyboard_input)
+        elif command == 'show':
+            show_map()
       
         debug("Comando " + command)
     
@@ -126,6 +176,9 @@ def main(args=None):
 
     #map_reader_thread = threading.Thread(target=map_read)
     #map_reader_thread.start()
+    
+    # Primeira leitura do mapa
+    map_read()
 
     keyboard_reader_thread = threading.Thread(target=keyboard_reader)
     keyboard_reader_thread.start()
@@ -144,7 +197,10 @@ def main(args=None):
 
 last_timestamp = ""
 debug_level = 1
-map = Map('/home/vinicius/s/doutorado/map2.txt')
+shared_map = Map('/home/vinicius/s/doutorado/map.txt')
+starting_position = (10, 10)
+position = starting_position
+first_loading = True
 
 if __name__ == '__main__':
     main()
