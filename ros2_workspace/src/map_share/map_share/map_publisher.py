@@ -92,7 +92,7 @@ def show_map():
   global map
   map.show()
   
-
+# Função que trata o comando put
 def put_obstacle(keyboard_input_list):
     print("Map before")
     show_map()
@@ -110,6 +110,10 @@ def main(args=None):
   provide_map_service_thread.start()
  
   update_msg(node, map)
+  
+  # Mostre o mapa para conferir se o mesmo está sendo recebido
+  # corretamente no cliente
+  show_map()
 
   command = ''
   while command != 'exit':
