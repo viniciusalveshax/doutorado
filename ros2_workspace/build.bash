@@ -11,6 +11,10 @@ echo
 echo "Recarregando o ambiente ..."
 source install/setup.bash
 
+# Sobrescrevendo arquivo com classes diversas
+cp -f map.py install/map_share/lib/map_share/map.py
+
 echo
 echo "Rodando $1 ..."
 ros2 run $PACKAGE_NAME $1
+
