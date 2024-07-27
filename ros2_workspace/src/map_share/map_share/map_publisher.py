@@ -4,6 +4,7 @@ from time import sleep
 
 import rclpy
 from rclpy.node import Node
+from rclpy.executors import MultiThreadedExecutor
 
 # Somente para testes iniciais
 import random
@@ -97,22 +98,57 @@ def put_obstacle(keyboard_input_list):
     show_map()
 
 def main(args=None):
-  rclpy.init(args=args)
 
-  node = rclpy.create_node('minimal_publisher')
+    rclpy.init(args=args)
 
-  provide_map_service_thread = threading.Thread(target=map_service)
-  provide_map_service_thread.start()
+    show_map()
+
+
+    # Trecho do executador adaptado a partir daqui
+    # https://robotics.stackexchange.com/questions/105877/node-keeps-crashing-due-to-valueerror-generator-already-executing
+    try:
+        executor = MultiThreadedExecutor()
+
+        node_publisher = rclpy.create_node('minimal_publisher')
+        executor.add_node(node_publisher)
+
+        get_map_service = MapService('node_get_map', GetMapData, 'get_map_data')
+        executor.add_node(get_map_service)
+	
+        receive_msg_service = ReceiveMsgService('node_receive_msg', SendMsgServer, 'send_msg_server')
+        executor.add_node(receive_msg_service)
+
+        try:
+            executor.spin()
+        except (KeyboardInterrupt, rclpy.executors.ExternalShutdownException):
+            executor.shutdown()
+            node_publisher.destroy_node()
+            receive_msg_service.destroy_node()
+            get_map_service.destroy_node()
+        finally:
+            executor.shutdown()
+            node_publisher.destroy_node()
+            receive_msg_service.destroy_node()
+            get_map_service.destroy_node()
+
+    finally:
+        rclpy.shutdown()
+
+
+    
+
+#    provide_map_service_thread = threading.Thread(target=map_service)
+ #   provide_map_service_thread.start()
 
   #provide_receive_msg_service_thread = threading.Thread(target=receive_msg_service)
   #provide_receive_msg_service_thread.start()
 
  
-  update_msg(node, map)
+  #  update_msg(node, map)
   
   # Mostre o mapa para conferir se o mesmo está sendo recebido
   # corretamente no cliente
-  show_map()
+  #  show_map()
 
 #  command = ''
 #  while command != 'exit':
@@ -126,7 +162,7 @@ def main(args=None):
 #      
 #    print(command)
       
-  while rclpy.ok():
+   # while rclpy.ok():
     
     # Simula um padrão aleatório de alteração do mapa
 #    rand_int = random.randint(0, 10)
@@ -134,12 +170,12 @@ def main(args=None):
 #    if rand_int <= 1:
 #      update_msg(node, map)    
 
-    sleep(60.0)  # seconds
+    #    sleep(60.0)  # seconds
 
-  print("Saindo do loop")
+    print("Saindo do loop")
 
   # Encerra a thread que provê o mapa
-  provide_map_service_thread.join()
+    #provide_map_service_thread.join()
   
   # Encerra a thread que permite o envio de msgs pro servidor
   #provide_receive_msg_service_thread.join()
@@ -147,8 +183,8 @@ def main(args=None):
   # Destroy the node explicitly
   # (optional - otherwise it will be done automatically
   # when the garbage collector destroys the node object)
-  node.destroy_node()
-  rclpy.shutdown()
+    #node.destroy_node()
+    #rclpy.shutdown()
 
 map = Map('/home/vinicius/s/doutorado/map.txt')
 
