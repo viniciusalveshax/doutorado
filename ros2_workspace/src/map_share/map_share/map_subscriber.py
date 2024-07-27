@@ -1,9 +1,15 @@
 import rclpy
 from rclpy.node import Node
 
+# Para lançar thread que lê o mapa inicialmente
+import threading
+
 #from std_msgs.msg import String
 from map_interfaces.msg import GetMapInfo #, GetMapData
 from map_interfaces.srv import GetMapData
+
+# Importa a classe que armazena o mapa
+from Map import Map
 
 def map_data_callback(msg):
     print("Mapa agora é ", msg.data)
@@ -52,17 +58,28 @@ class Subscriber(Node):
             10)
         self.subscription  # prevent unused variable warning
 
+def map_read():
+    map = Map('/home/vinicius/s/doutorado/map2.txt')
+    
+    print("Leu o mapa")
+
 def main(args=None):
     rclpy.init(args=args)
+
+    map_reader_thread = threading.Thread(target=map_read)
+    map_reader_thread.start()
+
 
     sub1 = Subscriber('/map_info', map_info_callback)
     #sub2 = Subscriber('/map_data', map_info_callback)
     rclpy.spin(sub1)
     
-    
-    
     sub.destroy_node()
     rclpy.shutdown()
+
+    # Encerra a thread que lê o mapa
+    map_reader_thread.join()
+
 
 
 if __name__ == '__main__':
