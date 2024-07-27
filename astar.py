@@ -86,8 +86,12 @@ class AStar:
 		return distance
 
 	def test_neighbor(self, x, y):
+		# Verifica se os vizinhos estão fora do labirinto
+		# e/ou são paredes
 		if 0 <= x < len(self.map):
 			if 0 <= y < len(self.map[x]):
+				# . são as paredes internas
+				# = e | são as paredes externas
 				if self.map[x][y] != '.' and self.map[x][y] != '=' and self.map[x][y] != '|':
 					return True
 
