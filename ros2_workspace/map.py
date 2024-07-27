@@ -32,7 +32,10 @@ class Map:
       
   def put(self, x, y):
     tmp_line = self.file_content[x]
-    tmp_line[y] = '.'
+    
+    #https://stackoverflow.com/questions/41752946/replacing-a-character-from-a-certain-index
+    tmp_line = tmp_line[:y] + '.' + tmp_line[y + 1:]
+    
     self.file_content[x] = tmp_line
     
   def version(self):
