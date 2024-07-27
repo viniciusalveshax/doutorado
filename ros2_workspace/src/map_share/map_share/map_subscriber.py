@@ -19,7 +19,7 @@ def map_data_callback(msg):
 
 
 def map_read():
-    map = Map('/home/vinicius/s/doutorado/map2.txt')
+    global map
     debug(map.version())
     
     debug("Lendo mapa")
@@ -86,10 +86,17 @@ class Subscriber(Node):
         self.subscription  # prevent unused variable warning
 
 def goto(keyboard_input):
-    print("Função goto")
+    debug("Função goto")
     
 def put(keyboard_input):
+    global map
     print("Função put")
+    x = keyboard_input[1]
+    y = keyboard_input[2]
+    debug("Adicionando obstáculo no caminho do robô na posição x:"+x+", y:"+y)
+    map.show()
+    map.put(int(x), int(y))
+    map.show()
 
 def keyboard_reader():
     command = ''
@@ -104,7 +111,10 @@ def keyboard_reader():
         elif command == 'put':
             put(keyboard_input)
       
-        debug("Command ", command)
+        debug("Comando " + command)
+    
+    debug('Saindo do loop')
+    #TODO Destruir nó e encerrar
 
 def debug(msg):
   global debug_level
@@ -124,7 +134,7 @@ def main(args=None):
     #sub2 = Subscriber('/map_data', map_info_callback)
     rclpy.spin(sub1)
     
-    sub.destroy_node()
+    sub1.destroy_node()
     rclpy.shutdown()
 
     # Encerra a thread que lê o mapa
@@ -132,9 +142,11 @@ def main(args=None):
 
     keyboard_reader_thread.join()
 
+last_timestamp = ""
+debug_level = 1
+map = Map('/home/vinicius/s/doutorado/map2.txt')
 
 if __name__ == '__main__':
     main()
     
-last_timestamp = ""
-debug_level = 0
+
