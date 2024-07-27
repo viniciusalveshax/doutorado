@@ -105,12 +105,12 @@ def main(args=None):
   while rclpy.ok():
     
     # Simula um padrão aleatório de alteração do mapa
-    rand_int = random.randint(0, 10)
-    print("Rand Int ", rand_int)    
-    if rand_int <= 2:
-      update_msg(node, map)    
+#    rand_int = random.randint(0, 10)
+#    print("Rand Int ", rand_int)    
+#    if rand_int <= 1:
+#      update_msg(node, map)    
 
-    sleep(1.0)  # seconds
+    sleep(60.0)  # seconds
 
   print("Saindo do loop")
 
@@ -123,7 +123,7 @@ def main(args=None):
   node.destroy_node()
   rclpy.shutdown()
 
-map = Map('/home/vinicius/s/doutorado/map2.txt')
+map = Map('/home/vinicius/s/doutorado/map.txt')
 
 if __name__ == '__main__':
   main()
