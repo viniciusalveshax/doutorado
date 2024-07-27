@@ -15,7 +15,7 @@ import time
 import threading
 
 from map_interfaces.msg import GetMapInfo
-from map_interfaces.srv import GetMapData
+from map_interfaces.srv import GetMapData, SendMsgServer
 
 # Importa a classe que armazena o mapa
 import sys
@@ -25,17 +25,31 @@ from map import Map
 
 class MinimalService(Node):
 
-    def __init__(self):
-        super().__init__('minimal_service')
-        self.srv = self.create_service(GetMapData, 'get_map_data', self.get_map_data_callback)
+    def __init__(self, node_name, server_interface_type, topic_name):
+        super().__init__(node_name)
+#        self.srv = self.create_service(GetMapData, 'get_map_data', self.get_map_data_callback)
+        self.srv = self.create_service(server_interface_type, topic_name, self.callback_method)
 
-    def get_map_data_callback(self, request, response):
+
+class MapService(MinimalService):
+    def callback_method(self, request, response):
         global map
         response.data = map.content()
         #self.get_logger().info('Incoming request\na: %d b: %d' % (request.a, request.b))
 
         return response
 
+class ReceiveMsgService(MinimalService):
+    def callback_method(self, request, request_response):
+
+	# TODO Atualizar mapa
+	
+	# TODO Avisar clientes da nova versão
+
+	# Confirma recebimento correto
+        request_response.response = True
+
+        return request_response
 
 
 def update_msg(node, map):
@@ -60,8 +74,14 @@ def update_msg(node, map):
 
 
 def map_service():
-  minimal_service = MinimalService()
-  rclpy.spin(minimal_service)
+  get_map_service = MapService('node_get_map', GetMapData, 'get_map_data')
+  rclpy.spin(get_map_service)
+
+def receive_msg_service():
+  receive_msg_service = ReceiveMsgService('node_receive_msg', SendMsgServer, 'send_msg_server')
+  rclpy.spin(receive_msg_service)
+  print("Chamou receive msg")
+
 
 def show_map():
   global map
@@ -83,6 +103,10 @@ def main(args=None):
 
   provide_map_service_thread = threading.Thread(target=map_service)
   provide_map_service_thread.start()
+
+  #provide_receive_msg_service_thread = threading.Thread(target=receive_msg_service)
+  #provide_receive_msg_service_thread.start()
+
  
   update_msg(node, map)
   
@@ -116,6 +140,9 @@ def main(args=None):
 
   # Encerra a thread que provê o mapa
   provide_map_service_thread.join()
+  
+  # Encerra a thread que permite o envio de msgs pro servidor
+  #provide_receive_msg_service_thread.join()
 
   # Destroy the node explicitly
   # (optional - otherwise it will be done automatically
