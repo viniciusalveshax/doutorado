@@ -11,28 +11,52 @@ from map_interfaces.srv import GetMapData
 # Importa a classe que armazena o mapa
 import sys
 #TODO fazer isso dentro do padrão do ROS2
-sys.path.append('/home/vinicius/projetos/github/doutorado/ros2_workspace')
+#sys.path.append('/home/vinicius/projetos/github/doutorado/ros2_workspace')
 from map import Map
 
 def map_data_callback(msg):
     print("Mapa agora é ", msg.data)
+
+
+def map_read():
+    map = Map('/home/vinicius/s/doutorado/map2.txt')
+    debug(map.version())
+    
+    debug("Lendo mapa")
+    minimal_client = MinimalClientAsync()
+    future = minimal_client.send_request()
+    rclpy.spin_until_future_complete(minimal_client, future)
+    debug("Requisição concluída")
+    response = future.result()
+    #minimal_client.get_logger().info(
+    #    'Resultado %s' %
+    #    (response.data))
+        
+    map.set_content(response.data)
+    #map.show()
+
+    minimal_client.destroy_node()
+    
+    debug("Leu o mapa")
+
 
 def map_info_callback(msg):
     global last_timestamp
     if msg.timestamp != last_timestamp:
         last_timestamp = msg.timestamp
         print("Timestamp mudou para", last_timestamp) 
-        minimal_client = MinimalClientAsync()
-        future = minimal_client.send_request()
-        rclpy.spin_until_future_complete(minimal_client, future)
-        response = future.result()
-        print("Aqui")
-        print(type(response.data))
-        #minimal_client.get_logger().info(response.data)
-        #print(response.data)
-        map_formated = ''.join(response.data)
-        print(map_formated)
-        minimal_client.destroy_node()
+        map_read()
+#        minimal_client = MinimalClientAsync()
+#        future = minimal_client.send_request()
+#        rclpy.spin_until_future_complete(minimal_client, future)
+#        response = future.result()
+#        print("Aqui")
+#        print(type(response.data))
+#        #minimal_client.get_logger().info(response.data)
+#        #print(response.data)
+#        map_formated = ''.join(response.data)
+#        print(map_formated)
+#        minimal_client.destroy_node()
 
 
 
@@ -61,25 +85,31 @@ class Subscriber(Node):
             10)
         self.subscription  # prevent unused variable warning
 
-def map_read():
-    map = Map('/home/vinicius/s/doutorado/map2.txt')
+def goto(keyboard_input):
+    print("Função goto")
     
-    print("Lendo mapa")
-    minimal_client = MinimalClientAsync()
-    future = minimal_client.send_request()
-    rclpy.spin_until_future_complete(minimal_client, future)
-    print("Requisição concluída")
-    response = future.result()
-    minimal_client.get_logger().info(
-        'Resultado %s' %
-        (response.data))
-        
-    map.set_content(response.data)
-    map.show()
+def put(keyboard_input):
+    print("Função put")
 
-    minimal_client.destroy_node()
+def keyboard_reader():
+    command = ''
+    while command != 'exit':
+
+        keyboard_input = input('Digite um comando')
+        keyboard_input = keyboard_input.split()
+        command = keyboard_input[0]
     
-    print("Leu o mapa")
+        if command == 'goto':
+            goto(keyboard_input)
+        elif command == 'put':
+            put(keyboard_input)
+      
+        debug("Command ", command)
+
+def debug(msg):
+  global debug_level
+  if debug_level == 1:
+    print(msg)
 
 def main(args=None):
     rclpy.init(args=args)
@@ -87,6 +117,8 @@ def main(args=None):
     #map_reader_thread = threading.Thread(target=map_read)
     #map_reader_thread.start()
 
+    keyboard_reader_thread = threading.Thread(target=keyboard_reader)
+    keyboard_reader_thread.start()
 
     sub1 = Subscriber('/map_info', map_info_callback)
     #sub2 = Subscriber('/map_data', map_info_callback)
@@ -98,9 +130,11 @@ def main(args=None):
     # Encerra a thread que lê o mapa
     #map_reader_thread.join()
 
+    keyboard_reader_thread.join()
 
 
 if __name__ == '__main__':
     main()
     
 last_timestamp = ""
+debug_level = 0
