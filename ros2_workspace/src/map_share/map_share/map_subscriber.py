@@ -93,29 +93,48 @@ class Subscriber(Node):
             10)
         self.subscription  # prevent unused variable warning
 
+def notify_obstacle_to_server(position):
+    # O -> Obstacle
+    msg = 'OX' + str(position[0]) + 'Y' + str(position[1])
+    send_msg_to_server(msg)
+    
+
 def follow_path(shared_map, planned_path):
     global position 
 
+    # Enquanto houver caminho a ser percorrido
     while planned_path != []:
-    
-    	# Bota um símbolo _ na posição antiga
-        shared_map.put(position[0], position[1], '_')
-        
+           
         # Pega a próxima posição
-        position = planned_path[0]
+        next_position = planned_path[0]
+        
+        # Testa se a próxima posição está bloqueada
+        if shared_map.get(next_position[0], next_position[1]) == '.':
+            break
+
+    	# Bota um símbolo _ na posição antiga
+        shared_map.put(position[0], position[1], '_')        
+
+	# Muda a posição            
+        position = next_position
         
         # Muda o símbolo da próxima posição
         shared_map.put(position[0], position[1], '*')
         
+        # Passa para a próxima posição do caminho e repete
+        planned_path.pop(0)
+
         # Mostra o mapa e espera um tempo
         # (para a atualização não ser tão rápida)
         shared_map.show()
-        sleep(3)
+        sleep(5)
         
-        # Passa para a próxima posição do caminho e repete
-        planned_path.pop(0)
-        
-    print("Cheguei")
+
+    if planned_path == []:  
+        print("Cheguei")
+    else:
+        # Encontrei um obstáculo inesperado
+        notify_obstacle_to_server(next_position)
         
 
 def goto(keyboard_input):
