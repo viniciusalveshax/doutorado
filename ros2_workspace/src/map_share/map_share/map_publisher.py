@@ -107,7 +107,7 @@ def main(args=None):
     # Simula um padrão aleatório de alteração do mapa
     rand_int = random.randint(0, 10)
     print("Rand Int ", rand_int)    
-    if rand_int <= 1:
+    if rand_int <= 2:
       update_msg(node, map)    
 
     sleep(1.0)  # seconds
