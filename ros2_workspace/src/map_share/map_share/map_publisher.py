@@ -17,6 +17,12 @@ import threading
 from map_interfaces.msg import GetMapInfo
 from map_interfaces.srv import GetMapData
 
+# Importa a classe que armazena o mapa
+import sys
+#TODO fazer isso dentro do padrão do ROS2
+sys.path.append('/home/vinicius/projetos/github/doutorado/ros2_workspace')
+from map import Map
+
 class MinimalService(Node):
 
     def __init__(self):
@@ -30,37 +36,6 @@ class MinimalService(Node):
 
         return response
 
-
-class Map:
-  def __init__(self, file_path):
-
-    self.file_content = []
-    tmp_file = open(file_path, 'r')
-    self.file_content = tmp_file.readlines()
-    
-    self.width = len(self.file_content[0])
-    self.height = len(self.file_content)
-    
-  def content(self):
-    return self.file_content
-    
-  def content2str(self):
-    return ''.join(self.file_content)
-    
-  def width(self):
-    return self.width
-   
-  def height(self):
-    return self.height
-
-  def show(self):
-    for line in self.file_content:
-      print(line, end='')
-      
-  def put(self, x, y):
-    tmp_line = self.file_content[x]
-    tmp_line[y] = '.'
-    self.file_content[x] = tmp_line
 
 
 def update_msg(node, map):
@@ -115,27 +90,27 @@ def main(args=None):
   # corretamente no cliente
   show_map()
 
-  command = ''
-  while command != 'exit':
+#  command = ''
+#  while command != 'exit':
 
-    keyboard_input = input('Digite um comando')
-    keyboard_input = keyboard_input.split()
-    command = keyboard_input[0]
-    
-    if command == 'put':
-      put_obstacle(keyboard_input)
+#    keyboard_input = input('Digite um comando')
+#    keyboard_input = keyboard_input.split()
+#    command = keyboard_input[0]
+#    
+#    if command == 'put':
+#      put_obstacle(keyboard_input)
+#      
+#    print(command)
       
-    print(command)
-      
-#  while rclpy.ok():
+  while rclpy.ok():
     
     # Simula um padrão aleatório de alteração do mapa
-    #rand_int = random.randint(0, 10)
-    #print("Rand Int ", rand_int)    
-    #if rand_int <= 1:
-    #  update_msg(node, map)    
+    rand_int = random.randint(0, 10)
+    print("Rand Int ", rand_int)    
+    if rand_int <= 1:
+      update_msg(node, map)    
 
-    #sleep(1.0)  # seconds
+    sleep(1.0)  # seconds
 
   print("Saindo do loop")
 
