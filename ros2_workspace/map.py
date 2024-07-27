@@ -30,6 +30,10 @@ class Map:
     for line in self.file_content:
       print(line, end='')
       
+  def get(self, x, y):
+    tmp_line = self.file_content[x]
+    return tmp_line[y]
+      
   def put(self, x, y, char = '.'):
     tmp_line = self.file_content[x]
     
