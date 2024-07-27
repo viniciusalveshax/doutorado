@@ -9,7 +9,7 @@ import threading
 
 #from std_msgs.msg import String
 from map_interfaces.msg import GetMapInfo #, GetMapData
-from map_interfaces.srv import GetMapData
+from map_interfaces.srv import GetMapData, SendMsgServer
 
 # Importa a classe que armazena o mapa
 #import sys
@@ -27,7 +27,7 @@ def map_read():
     debug(shared_map.version())
     
     debug("Lendo mapa")
-    minimal_client = MinimalClientAsync()
+    minimal_client = MinimalClientAsync(GetMapData, 'get_map_data')
     future = minimal_client.send_request()
     rclpy.spin_until_future_complete(minimal_client, future)
     debug("Requisição concluída")
@@ -70,18 +70,23 @@ def map_info_callback(msg):
 
 class MinimalClientAsync(Node):
 
-    def __init__(self):
+    def __init__(self, server_interface_type, topic_name):
         super().__init__('minimal_client_async')
-        self.cli = self.create_client(GetMapData, 'get_map_data')
+        #self.cli = self.create_client(GetMapData, 'get_map_data')
+        self.cli = self.create_client(server_interface_type, topic_name)
         while not self.cli.wait_for_service(timeout_sec=1.0):
             self.get_logger().info('service not available, waiting again...')
-        self.req = GetMapData.Request()
+        self.req = server_interface_type.Request()
 
     def send_request(self):
         #self.req.a = a
         #self.req.b = b
         return self.cli.call_async(self.req)
 
+class ClientWithOneParam(MinimalClientAsync):
+    def send_request(self, a):
+        self.req.a = a
+        return self.cli.call_async(self.req)
 
 class Subscriber(Node):
     def __init__(self, topic_name, callback_function):
@@ -92,6 +97,21 @@ class Subscriber(Node):
             callback_function,
             10)
         self.subscription  # prevent unused variable warning
+
+def send_msg_to_server(msg):
+    client_with_param = MinimalClientAsync(SendMsgServer, 'send_msg_server')
+    future = minimal_client.send_request(msg)
+    rclpy.spin_until_future_complete(minimal_client, future)
+    debug("Requisição concluída")
+    request_response = future.result()
+    #minimal_client.get_logger().info(
+    #    'Resultado %s' %
+    #    (response.data))
+    
+    debug(request_response.response)
+    
+    #shared_map.set_content(response.data)
+
 
 def notify_obstacle_to_server(position):
     # O -> Obstacle
@@ -127,7 +147,7 @@ def follow_path(shared_map, planned_path):
         # Mostra o mapa e espera um tempo
         # (para a atualização não ser tão rápida)
         shared_map.show()
-        sleep(5)
+        sleep(2)
         
 
     if planned_path == []:  
