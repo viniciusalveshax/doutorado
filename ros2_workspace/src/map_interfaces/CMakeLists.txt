@@ -17,6 +17,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/AddTwoInts.srv"
   "srv/GetRand.srv"
   "srv/GetMapData.srv"
+  "srv/SendMsgServer.srv"
   "msg/GetMapInfo.msg"
   #DEPENDENCIES geometry_msgs # Add packages that above messages depend on, in this case geometry_msgs for Sphere.msg
 )
