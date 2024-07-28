@@ -1,5 +1,6 @@
 import rclpy
 from rclpy.node import Node
+from rclpy.executors import MultiThreadedExecutor
 
 # Para usar o sleep
 from time import sleep
@@ -12,7 +13,9 @@ from map_interfaces.msg import GetMapInfo #, GetMapData
 from map_interfaces.srv import GetMapData, SendMsgServer
 
 # Importa a classe que armazena o mapa
-#import sys
+
+import sys
+
 #TODO fazer isso dentro do padrão do ROS2
 #sys.path.append('/home/vinicius/projetos/github/doutorado/ros2_workspace')
 from map import Map
@@ -23,11 +26,10 @@ def map_data_callback(msg):
 
 
 def map_read():
-    global shared_map, first_loading
+    global shared_map, first_loading, minimal_client, executor
     debug(shared_map.version())
     
     debug("Lendo mapa")
-    minimal_client = MinimalClientAsync(GetMapData, 'get_map_data')
     future = minimal_client.send_request()
     rclpy.spin_until_future_complete(minimal_client, future)
     debug("Requisição concluída")
@@ -43,7 +45,6 @@ def map_read():
     shared_map.put(position[0], position[1], '*')
     #first_loading = False
 
-    minimal_client.destroy_node()
     
     debug("Leu o mapa")
 
@@ -99,9 +100,9 @@ class Subscriber(Node):
         self.subscription  # prevent unused variable warning
 
 def send_msg_to_server(msg):
-    client_with_param = MinimalClientAsync(SendMsgServer, 'send_msg_server')
-    future = minimal_client.send_request(msg)
-    rclpy.spin_until_future_complete(minimal_client, future)
+    global client_with_param, executor
+    future = client_with_param.send_request(msg)
+    rclpy.spin_until_future_complete(client_with_param, future)
     debug("Requisição concluída")
     request_response = future.result()
     #minimal_client.get_logger().info(
@@ -116,8 +117,8 @@ def send_msg_to_server(msg):
 def notify_obstacle_to_server(position):
     # O -> Obstacle
     msg = 'OX' + str(position[0]) + 'Y' + str(position[1])
-    #send_msg_to_server(msg)
     debug("Encontrei obstáculo")
+    send_msg_to_server(msg)
     
 
 def follow_path(shared_map, planned_path):
@@ -213,6 +214,8 @@ def keyboard_reader():
     
     debug('Saindo do loop')
     #TODO Destruir nó e encerrar
+    sys.exit()
+
 
 def debug(msg):
   global debug_level
@@ -220,7 +223,20 @@ def debug(msg):
     print(msg)
 
 def main(args=None):
+    global executor, minimal_client, client_with_param
+
     rclpy.init(args=args)
+
+    # Executador de múltiplas threads
+    executor = MultiThreadedExecutor()
+
+    # Nó para requisitar dados do mapa
+    minimal_client = MinimalClientAsync(GetMapData, 'get_map_data')
+    executor.add_node(minimal_client)
+
+    # Nó para mandar mensagem para o servidor
+    client_with_param = ClientWithOneParam(SendMsgServer, 'send_msg_server')
+    executor.add_node(client_with_param)
 
     #map_reader_thread = threading.Thread(target=map_read)
     #map_reader_thread.start()
@@ -233,15 +249,21 @@ def main(args=None):
 
     sub1 = Subscriber('/map_info', map_info_callback)
     #sub2 = Subscriber('/map_data', map_info_callback)
-    rclpy.spin(sub1)
-    
-    sub1.destroy_node()
+    #rclpy.spin(sub1)
+
+    executor.add_node(sub1)
+    executor.spin()
+
+    sub1.destroy_node()    
+    minimal_client.destroy_node()
+    client_with_param.destroy_node()
+    keyboard_reader_thread.join()
+    executor.shutdown()
     rclpy.shutdown()
 
     # Encerra a thread que lê o mapa
     #map_reader_thread.join()
 
-    keyboard_reader_thread.join()
 
 last_timestamp = ""
 debug_level = 1
@@ -249,6 +271,7 @@ shared_map = Map('/home/vinicius/s/doutorado/map.txt')
 starting_position = (10, 10)
 position = starting_position
 first_loading = True
+
 
 if __name__ == '__main__':
     main()
