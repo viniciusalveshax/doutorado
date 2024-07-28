@@ -20,12 +20,14 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'server = map_share.map_server:main',
+            'server_first = map_share.map_server:main',
             'client = map_share.map_client:main',
             'rand_server = map_share.map_rand_server:main',
             'rand_client = map_share.map_rand_client:main',
-            'publisher = map_share.map_publisher:main',
-            'subscriber = map_share.map_subscriber:main',
+            'publisher = map_share.map_publisher:main', #Text ok version
+            'subscriber = map_share.map_subscriber:main', #Text ok version
+            'server = map_share.map_share_server:main', #Pygame version
+            'pygame = map_share.map_pygame_client:main', #Pygame version
         ],
     },
 )
