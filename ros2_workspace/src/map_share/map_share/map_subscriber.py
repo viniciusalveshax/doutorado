@@ -71,8 +71,8 @@ def map_info_callback(msg):
 
 class MinimalClientAsync(Node):
 
-    def __init__(self, server_interface_type, topic_name):
-        super().__init__('minimal_client_async')
+    def __init__(self, node_name, server_interface_type, topic_name):
+        super().__init__(node_name)
         #self.cli = self.create_client(GetMapData, 'get_map_data')
         self.cli = self.create_client(server_interface_type, topic_name)
         while not self.cli.wait_for_service(timeout_sec=1.0):
@@ -231,11 +231,11 @@ def main(args=None):
     executor = MultiThreadedExecutor()
 
     # Nó para requisitar dados do mapa
-    minimal_client = MinimalClientAsync(GetMapData, 'get_map_data')
+    minimal_client = MinimalClientAsync('node_get_data', GetMapData, 'get_map_data')
     executor.add_node(minimal_client)
 
     # Nó para mandar mensagem para o servidor
-    client_with_param = ClientWithOneParam(SendMsgServer, 'send_msg_server')
+    client_with_param = ClientWithOneParam('node_send_msg', SendMsgServer, 'send_msg_server')
     executor.add_node(client_with_param)
 
     #map_reader_thread = threading.Thread(target=map_read)
