@@ -116,7 +116,8 @@ def send_msg_to_server(msg):
 def notify_obstacle_to_server(position):
     # O -> Obstacle
     msg = 'OX' + str(position[0]) + 'Y' + str(position[1])
-    send_msg_to_server(msg)
+    #send_msg_to_server(msg)
+    debug("Encontrei obstáculo")
     
 
 def follow_path(shared_map, planned_path):
@@ -181,20 +182,28 @@ def put(keyboard_input):
     x = keyboard_input[1]
     y = keyboard_input[2]
     debug("Adicionando obstáculo no caminho do robô na posição x:"+x+", y:"+y)
-    shared_map.show()
+   # shared_map.show()
     shared_map.put(int(x), int(y))
     shared_map.show()
+
+def menu():
+    print("Digite um comando")
+    print("exit\ngoto X Y\nput X Y\nshow")
+    keyboard_input = input('Digite um comando')
+    return keyboard_input
 
 def keyboard_reader():
     command = ''
     while command != 'exit':
 
-        keyboard_input = input('Digite um comando')
+        keyboard_input = menu()
         keyboard_input = keyboard_input.split()
         command = keyboard_input[0]
     
         if command == 'goto':
-            goto(keyboard_input)
+            #goto(keyboard_input)
+            goto_thread = threading.Thread(target=goto, args=(keyboard_input,))
+            goto_thread.start()
         elif command == 'put':
             put(keyboard_input)
         elif command == 'show':
