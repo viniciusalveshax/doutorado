@@ -117,7 +117,7 @@ def send_msg_to_server(msg):
 def notify_obstacle_to_server(position):
     # O -> Obstacle
     msg = 'OX' + str(position[0]) + 'Y' + str(position[1])
-    debug("Encontrei obstáculo")
+    debug("Encontrei obstáculo. Mandando msg: " + msg)
     send_msg_to_server(msg)
     
 
@@ -176,6 +176,7 @@ def goto(keyboard_input):
 def show_map():
     global shared_map
     shared_map.show() 
+    #menu()
    
 def put(keyboard_input):
     global shared_map

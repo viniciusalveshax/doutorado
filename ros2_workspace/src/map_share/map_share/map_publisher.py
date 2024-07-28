@@ -24,6 +24,25 @@ import sys
 sys.path.append('/home/vinicius/projetos/github/doutorado/ros2_workspace')
 from map import Map
 
+class MinimalPublisher(Node):
+
+    def __init__(self):
+        super().__init__('minimal_publisher')
+        self.publisher_ = self.create_publisher(GetMapInfo, '/map_info', 10)
+        #timer_period = 0.5  # seconds
+        #self.timer = self.create_timer(timer_period, self.timer_callback)
+        self.i = 0
+
+    def timer_callback(self):
+        msg = GetMapInfo()
+        msg.timestamp = 'Hello World: %d' % self.i
+        msg.height = 100
+        msg.width = 100
+        self.publisher_.publish(msg)
+        self.get_logger().info('Publishing: "%s"' % msg.timestamp)
+        self.i += 1
+
+
 class MinimalService(Node):
 
     def __init__(self, node_name, server_interface_type, topic_name):
@@ -42,37 +61,62 @@ class MapService(MinimalService):
 
 class ReceiveMsgService(MinimalService):
     def callback_method(self, request, request_response):
+        global map
 
-	# TODO Atualizar mapa
+        content = request.a
 	
-	# TODO Avisar clientes da nova versão
+        print("Recebi uma mensagem. Conteúdo: ", content)
+        # Encontrou obstáculo, então atualiza o mapa
+        if content[0] == 'O':
+            position_list = content.split("X")[1].split("Y")
+            map.put(int(position_list[0]), int(position_list[1]))
+            #map_updated = True
+	
+        # TODO Avisar clientes da nova versão
 
 	# Confirma recebimento correto
-        request_response.response = True
+        request_response.response = 1
+        
+        print("Vou chamar update_msg")
+
+        update_msg()
 
         return request_response
 
 
-def update_msg(node, map):
+def update_msg():
+  global map, publisher_map_info #, node
 
-  publisher_map_info = node.create_publisher(GetMapInfo, '/map_info', 10)
+
   #publisher_map_data = node.create_publisher(GetMapData, '/map_data', 10) 
+  
 
   map_info_msg = GetMapInfo()
   #map_data_msg = GetMapData()
 
   i = int(time.time())
   #TODO Mudar tipo de dado para mandar int logo
-  map_info_msg.timestamp = '%d' % i
+  #print("i = ", i)
+
+  #map_info_msg.timestamp = '%d' % i
+  map_info_msg.timestamp = str(i)
+ # print("Vou publicar ", map_info_msg.timestamp)
+
   map_info_msg.width = map.width
   map_info_msg.height = map.height
-  print("Vou publicar ", map_info_msg.timestamp)
+
+#  node_publisher.publish(map_info_msg)
+
         
   #map_data_msg.data = map.content2str()
        
-  publisher_map_info.publish(map_info_msg)
+  #publisher_map_info.publish(map_info_msg)
   #publisher_map_data.publish(map_data_msg)
 
+  publisher_map_info.publish(map_info_msg)
+
+  map.show()
+  print("Informação publicada")
 
 def map_service():
   get_map_service = MapService('node_get_map', GetMapData, 'get_map_data')
@@ -96,12 +140,26 @@ def put_obstacle(keyboard_input_list):
     y = int(keyboard_input_list[2])
     print("Map after")
     show_map()
+    
+def check_update():
+    if map_updated:
+        update_msg()
+    else:
+        print("Sem atualizações, vou dormir um pouco")
+        sleep(10.0)
 
 def main(args=None):
+    global node_publisher, node, publisher_map_info
 
     rclpy.init(args=args)
 
     show_map()
+
+    node = rclpy.create_node('minimal_publisher')
+    publisher_map_info = node.create_publisher(GetMapInfo, '/map_info', 10)
+
+    #check_for_updates_thread = threading.Thread(target=check_update)
+    #check_for_updates_thread.start()
 
 
     # Trecho do executador adaptado a partir daqui
@@ -109,8 +167,11 @@ def main(args=None):
     try:
         executor = MultiThreadedExecutor()
 
-        node_publisher = rclpy.create_node('minimal_publisher')
-        executor.add_node(node_publisher)
+        #node_publisher = MinimalPublisher()
+        #executor.add_node(node_publisher)
+        #node = rclpy.create_node('minimal_publisher')
+        update_msg()
+        executor.add_node(node)
 
         get_map_service = MapService('node_get_map', GetMapData, 'get_map_data')
         executor.add_node(get_map_service)
@@ -122,16 +183,17 @@ def main(args=None):
             executor.spin()
         except (KeyboardInterrupt, rclpy.executors.ExternalShutdownException):
             executor.shutdown()
-            node_publisher.destroy_node()
+            #node_publisher.destroy_node()
             receive_msg_service.destroy_node()
             get_map_service.destroy_node()
         finally:
             executor.shutdown()
-            node_publisher.destroy_node()
+            #node_publisher.destroy_node()
             receive_msg_service.destroy_node()
             get_map_service.destroy_node()
 
     finally:
+        node.destroy_node()
         rclpy.shutdown()
 
 
@@ -187,6 +249,7 @@ def main(args=None):
     #rclpy.shutdown()
 
 map = Map('/home/vinicius/s/doutorado/map.txt')
+map_updated = True
 
 if __name__ == '__main__':
   main()
