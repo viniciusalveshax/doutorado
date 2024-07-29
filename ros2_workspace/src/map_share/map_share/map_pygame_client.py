@@ -203,23 +203,62 @@ def move_to_position(next_position):
 	while((x,y) != next_position):
 		pygame.time.wait(500)
 		
-		reset_background()
+		reset_background(x, y)
 #		draw_square(x, y, color_white)
 		x = x + delta_x
 		y = y + delta_y
 		draw_red_square(x, y)
 
-def reset_background():
+def reset_background(x, y):
 	global img_np, start_background
-	img_np = np.copy(start_background)
+	#img_np = np.copy(start_background)
+	
+	#img_np[x:x+size, y:y+size] = color
+	
+	half_size = int(size/2)
+	
+	img_np[x-half_size:x+half_size, y-half_size:y+half_size] = start_background[x-half_size:x+half_size, y-half_size:y+half_size]
 
 def follow_path(minimap_path):
 	for position in minimap_path:
 		move_to_position(position)
+		
+def gotomini(x_destination, y_destination):
+	x_destination = int(x_destination)
+	y_destination = int(y_destination)
+	x_dest_minimaze = int(x_destination/scale)
+	y_dest_minimaze = int(y_destination/scale)						
+
+	x_minimap = int(x/scale)
+	y_minimap = int(y/scale)
+
+	maze = AStar(map=minimap, start=(x_minimap, y_minimap), end=(x_dest_minimaze, y_dest_minimaze), debug=False)
+	if maze.solve() == True:
+		#maze_path.print_map_with_solution()
+		maze_path = maze.get_path()
+
+		# Se não adicionar a posição inicial não vai desenhar a última linha até o robô pois existe uma descontinuidade na amostragem
+		maze_path = [(x_minimap, y_minimap)] + maze_path
+		if debug_level==2:
+			print("Foi possível resolver. Maze path: ", maze_path)
+			draw_path(maze_path)
+		print("Tamanho da solução: ", len(maze_path))
+		
+		# Elimina posições dentro da mesma reta
+		resumed_path = draw_minimap_path(maze_path)
+
+		print("Tamanho da solução resumida: ", len(resumed_path))
+		
+		follow_path_thread = threading.Thread(target=follow_path, args=(resumed_path,))
+		follow_path_thread.start()		
+		#follow_path(resumed_path)
+	else:
+		print("Não foi possível resolver")
+
 
 #Keyboard thread that read the keyboard and do something
 def read_keyboard():
-	global running, x, y, img_np
+	global running, x, y, img_np, scale
 
 	while running == True:
 
@@ -245,6 +284,10 @@ def read_keyboard():
 			draw_red_square(x + size*dt, y)
 		elif keyboard_input[0] == 'h':
 			show_menu_options()
+		elif keyboard_input[0] == 'put':
+			x_destination = keyboard_input[1]
+			y_destination = keyboard_input[2]
+			draw_obstacle(x_destination, y_destination)
 		elif keyboard_input[0] == "goto":
 			x_destination = keyboard_input[1]
 			y_destination = keyboard_input[2]
@@ -262,7 +305,8 @@ def read_keyboard():
 				print("Foi possível resolver")
 				#maze_path.print_map_with_solution()
 				maze_path = maze.get_path()
-				print(maze_path)
+				
+				print("Tamanho labirinto ", len(maze_path))
 				draw_path(maze_path)
 			else:
 				print("Não foi possível resolver")
@@ -271,29 +315,7 @@ def read_keyboard():
 		elif keyboard_input[0] == "gotomini":
 			x_destination = keyboard_input[1]
 			y_destination = keyboard_input[2]
-			x_destination = int(x_destination)
-			y_destination = int(y_destination)
-			x_dest_minimaze = int(x_destination/scale)
-			y_dest_minimaze = int(y_destination/scale)						
-		
-			x_minimap = int(x/scale)
-			y_minimap = int(y/scale)
-		
-			maze = AStar(map=minimap, start=(x_minimap, y_minimap), end=(x_dest_minimaze, y_dest_minimaze), debug=False)
-			if maze.solve() == True:
-				#maze_path.print_map_with_solution()
-				maze_path = maze.get_path()
-	
-				# Se não adicionar a posição inicial não vai desenhar a última linha até o robô pois existe uma descontinuidade na amostragem
-				maze_path = [(x_minimap, y_minimap)] + maze_path
-				if debug_level==2:
-					print("Foi possível resolver. Maze path: ", maze_path)
-				draw_path(maze_path)
-				resumed_path = draw_minimap_path(maze_path)
-				
-				follow_path(resumed_path)
-			else:
-				print("Não foi possível resolver")
+			gotomini(x_destination, y_destination)
 		
 		
 		# Teste com quadrado cyano
@@ -317,17 +339,26 @@ def draw_path(path_list):
 		img_np[x:x+tmp_size, y:y+tmp_size] = (0, 255, 0)
 	surf = pygame.surfarray.make_surface(img_np)
 	screen.blit(surf, (0, 0))
+
+# Desenha um obstáculo no caminho do agente	
+def draw_obstacle(x, y):
+	draw_square(int(x), int(y), color_blue)
 	
-
-
+	
 def draw_square(x, y, color):
-	global img_np, size
+	global img_np, size, surf
+	
+	half_size = int(size/2)
 	
 	#Centraliza o robô
-	x = int(x - size/2)
-	y = int(y - size/2)
+	x = int(x - half_size)
+	y = int(y - half_size)
 
 	img_np[x:x+size, y:y+size] = color
+
+	surf = pygame.surfarray.make_surface(img_np)
+	screen.blit(surf, (0, 0))
+
 
 
 def draw_destination(x, y):
@@ -438,7 +469,7 @@ def notify_obstacle_to_server(position):
     debug("Encontrei obstáculo. Mandando msg: " + msg)
     send_msg_to_server(msg)
     
-def follow_path(shared_map, planned_path):
+def follow_text_path(shared_map, planned_path):
     global position 
 
     # Enquanto houver caminho a ser percorrido
@@ -486,7 +517,7 @@ def goto(keyboard_input):
     if maze.solve() == True:
         maze.print_map_with_solution()
         planned_path = maze.get_path()
-        follow_path(shared_map, planned_path)
+        follow_text_path(shared_map, planned_path)
     else:
         debug("Mapa sem solução :(")
     
@@ -555,15 +586,15 @@ def draw_red_square(new_x, new_y):
 		print("Drawing red square at x:", x, " y: ", y) 
 	draw_square(new_x, new_y, color_red)
 
-	surf = pygame.surfarray.make_surface(img_np)
-	screen.blit(surf, (0, 0))
+#	surf = pygame.surfarray.make_surface(img_np)
+#	screen.blit(surf, (0, 0))
 
 	#Atualiza as variáveis globais de posição
 	x = new_x
 	y = new_y
 
 def pygame_window():
-	global x, y, running, dt
+	global x, y, running, dt, scale, minimap
 
 	# Inicialização do Pygame
 	pygame.init()
@@ -587,9 +618,10 @@ def pygame_window():
 
 	x_minimap = int(x/scale)
 	y_minimap = int(y/scale)
-	print(minimap[x_minimap][y_minimap])
-
-	print("x minimap ", x_minimap, " , y_minimap ", y_minimap)
+	
+	if debug_level==2:
+		print(minimap[x_minimap][y_minimap])
+		print("x minimap ", x_minimap, " , y_minimap ", y_minimap)
 
 	
 
@@ -671,16 +703,17 @@ def main(args=None):
 	#map_reader_thread.join()
 
 def setup_vars():
-	global x, y, shared_map, debug_level, position, color_white, color_red, color_cyan, color_black, screen, clock, running, dt, size, img, img_np, start_background, surf, pxarray, paused, previous_x_destination, previous_y_destination
+	global x, y, shared_map, debug_level, position, color_white, color_red, color_cyan, color_black, color_blue, screen, clock, running, dt, size, img, img_np, start_background, surf, pxarray, paused, previous_x_destination, previous_y_destination
 
 	# 0: none, 1: minimal, 2: maximal
-	debug_level = 1
+	debug_level = 0
 
 	# Configura algumas cores comuns
 	color_red = (255, 0, 0)
 	color_white = (255, 255, 255)
 	color_cyan = (0, 255, 255)
 	color_black = (0, 0, 0)
+	color_blue = (0, 0, 255)
 
 	screen = pygame.display.set_mode((720, 720))
 	clock = pygame.time.Clock()
@@ -714,7 +747,6 @@ def setup_vars():
 	previous_y_destination = -1
 
 	last_timestamp = ""
-	debug_level = 1
 	shared_map = Map('/home/vinicius/s/doutorado/map.txt')
 	starting_position = (10, 10)
 	position = starting_position
