@@ -183,6 +183,15 @@ def move_to_position(next_position):
 	delta = 5
 
 	next_x, next_y = next_position
+	
+	#sub_array = img[next][next_y]
+	print(type(img_np[next_x][next_y]))
+	print(img_np[next_x][next_y])
+	
+	tmp_np = np.array(color_blue)
+	
+	if (img_np[next_x][next_y] == tmp_np).all() == True:
+		print("Encontrei um obstáculo")
 
 	# Descubre se o movimento até a próxima posição é na horizontal ou na vertical	
 	if x == next_x:
