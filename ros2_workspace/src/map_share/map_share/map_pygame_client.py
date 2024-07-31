@@ -177,6 +177,13 @@ def show_menu_options():
 	print('t ou y para testar a saída')
 	print('h para repetir as opções')
 
+def debug_pixel(x, y):
+	for tmp_x in range(x,x+size):
+		for tmp_y in range(y,y+size):
+			print(img_np[tmp_x][tmp_y], end='')
+		print('')
+
+
 def move_to_position(next_position):
 	global x,y
 	
@@ -184,45 +191,76 @@ def move_to_position(next_position):
 
 	next_x, next_y = next_position
 	
+	debug_pixel(next_x, next_y)
 	#sub_array = img[next][next_y]
-	print(type(img_np[next_x][next_y]))
-	print(img_np[next_x][next_y])
+	#print("200 150", img_np[200][150])
+	#print(type(img_np[next_x][next_y]))
+	#print("move to ", img_np[x][y])
+	#print("move to ", img_np[next_x][next_y])
 	
 	tmp_np = np.array(color_blue)
 	
 	if (img_np[next_x][next_y] == tmp_np).all() == True:
-		print("Encontrei um obstáculo")
+		print("Encontrei um obstáculo. Vou avisar o servidor ...")
+		notify_obstacle_to_server(next_position)
+		return
+
+	half_size = int(size/2)
+	test_y = test_x = 0
 
 	# Descubre se o movimento até a próxima posição é na horizontal ou na vertical	
 	if x == next_x:
 		delta_x = 0
 		if y > next_y:
 			delta_y = -delta
+			test_y = -half_size
 		else:
 			delta_y = delta
+			test_y = half_size
 	else:
 		delta_y = 0
 		if x > next_x:
 			delta_x = -delta
+			test_x = -half_size
 		else:
 			delta_x = delta
+			test_x = half_size
 		
 		
 	
 	while((x,y) != next_position):
 		pygame.time.wait(500)
-		
-		reset_background(x, y)
+
+		#print('img_np',img_np[x][y])
+		#reset_background(x, y)
 #		draw_square(x, y, color_white)
+
+		if img_np[x+test_x][y+test_y][0] == 0 and img_np[x+test_x][y+test_y][1] == 0 and img_np[x+test_x][y+test_y][2] == 255:
+			print("Encontrei um obstáculo. Vou avisar o servidor ...")
+			notify_obstacle_to_server(next_position)
+			return
+		else:
+			print("Movendo para x=",x,",y=",y)
+
+		reset_background(x,y)
 		x = x + delta_x
 		y = y + delta_y
+		#print('img_np após atualização',img_np[x][y])
+		#print('tmp_np',tmp_np)
+		if img_np[x][y][0] == 0 and img_np[x][y][1] == 0 and img_np[x][y][2] == 255:
+			print("Encontrei um obstáculo. Vou avisar o servidor ...")
+			notify_obstacle_to_server(next_position)
+			return
+		else:
+			print("Movendo para x=",x,",y=",y)
+
 		draw_red_square(x, y)
 
 def reset_background(x, y):
 	global img_np, start_background
 	#img_np = np.copy(start_background)
 	
-	#img_np[x:x+size, y:y+size] = color
+	#img_np[x:x+size, y:y+size] = color_blue
 	
 	half_size = int(size/2)
 	
@@ -351,7 +389,10 @@ def draw_path(path_list):
 
 # Desenha um obstáculo no caminho do agente	
 def draw_obstacle(x, y):
+	x = int(x)
+	y = int(y)
 	draw_square(int(x), int(y), color_blue)
+	print("Após desenhar obstáculo ->", img_np[x][y])
 	
 	
 def draw_square(x, y, color):
@@ -360,10 +401,14 @@ def draw_square(x, y, color):
 	half_size = int(size/2)
 	
 	#Centraliza o robô
-	x = int(x - half_size)
-	y = int(y - half_size)
+#	x = int(x - half_size)
+#	y = int(y - half_size)
+
+	x = int(x)
+	y = int(y)
 
 	img_np[x:x+size, y:y+size] = color
+	
 
 	surf = pygame.surfarray.make_surface(img_np)
 	screen.blit(surf, (0, 0))
@@ -712,7 +757,7 @@ def main(args=None):
 	#map_reader_thread.join()
 
 def setup_vars():
-	global x, y, shared_map, debug_level, position, color_white, color_red, color_cyan, color_black, color_blue, screen, clock, running, dt, size, img, img_np, start_background, surf, pxarray, paused, previous_x_destination, previous_y_destination
+	global x, y, shared_map, debug_level, position, color_white, color_red, color_cyan, color_black, color_blue, screen, clock, running, dt, size, img, img_np, start_background, surf, pxarray, paused, previous_x_destination, previous_y_destination, last_timestamp
 
 	# 0: none, 1: minimal, 2: maximal
 	debug_level = 0
