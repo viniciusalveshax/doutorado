@@ -232,7 +232,7 @@ def move_to_position(next_position):
 		pygame.time.wait(500)
 
 		#print('img_np',img_np[x][y])
-		#reset_background(x, y)
+#		reset_background(x, y)
 #		draw_square(x, y, color_white)
 
 		if img_np[x+test_x][y+test_y][0] == 0 and img_np[x+test_x][y+test_y][1] == 0 and img_np[x+test_x][y+test_y][2] == 255:
@@ -263,8 +263,23 @@ def reset_background(x, y):
 	#img_np[x:x+size, y:y+size] = color_blue
 	
 	half_size = int(size/2)
+	int_size = int(size)
 	
-	img_np[x-half_size:x+half_size, y-half_size:y+half_size] = start_background[x-half_size:x+half_size, y-half_size:y+half_size]
+	color_background = start_background[x][y]
+	
+	#for tmp_x in range(x-half_size, x+half_size):
+	#	for tmp_y in range(y-half_size, y+half_size):
+	#		img_np[tmp_x][tmp_y] = start_background[tmp_x][tmp_y]
+	#		img_np[tmp_x][tmp_y] = color_background
+
+	for tmp_x in range(x, x+int_size):
+		for tmp_y in range(y, y+int_size):
+			img_np[tmp_x][tmp_y] = start_background[tmp_x][tmp_y]
+			#img_np[tmp_x][tmp_y] = color_background
+
+
+#	
+	#img_np[(x-half_size):(x+half_size)][(y-half_size):(y+half_size)] = start_background[(x-half_size):(x+half_size)][(y-half_size):(y+half_size)]
 
 def follow_path(minimap_path):
 	for position in minimap_path:
