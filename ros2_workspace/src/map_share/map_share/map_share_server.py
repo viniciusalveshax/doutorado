@@ -66,10 +66,11 @@ class ReceiveMsgService(MinimalService):
         content = request.a
 	
         print("Recebi uma mensagem. Conteúdo: ", content)
+        
         # Encontrou obstáculo, então atualiza o mapa
-        if content[0] == 'O':
-            position_list = content.split("X")[1].split("Y")
-            map.put(int(position_list[0]), int(position_list[1]))
+        #if content[0] == 'O':
+        #    position_list = content.split("X")[1].split("Y")
+        #    map.put(int(position_list[0]), int(position_list[1]))
             #map_updated = True
 	
         # TODO Avisar clientes da nova versão
@@ -79,12 +80,12 @@ class ReceiveMsgService(MinimalService):
         
         print("Vou chamar update_msg")
 
-        update_msg()
+        update_msg(content)
 
         return request_response
 
 
-def update_msg():
+def update_msg(content = ''):
   global map, publisher_map_info #, node
 
 
@@ -99,7 +100,7 @@ def update_msg():
   #print("i = ", i)
 
   #map_info_msg.timestamp = '%d' % i
-  map_info_msg.timestamp = str(i)
+  map_info_msg.timestamp = str(i) + content
  # print("Vou publicar ", map_info_msg.timestamp)
 
   map_info_msg.width = map.width
@@ -116,7 +117,7 @@ def update_msg():
   publisher_map_info.publish(map_info_msg)
 
   map.show()
-  print("Informação publicada")
+  print("Informação publicada: ", map_info_msg.timestamp)
 
 def map_service():
   get_map_service = MapService('node_get_map', GetMapData, 'get_map_data')
