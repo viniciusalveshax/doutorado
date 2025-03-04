@@ -1,5 +1,8 @@
 import pygame
 
+# Para escolhar o sentido inicial dos objetos que se movem
+import random
+
 # # To use math.ceil
 # import math
 
@@ -187,6 +190,100 @@ import threading
 # 	for position in minimap_path:
 # 		move_to_position(position)
 
+def check_colision(x, y):
+
+	# Testa limites da tela
+	if x < 0 or y < 0 or x > max_screen_size or y > max_screen_size:
+		return True
+
+	# Testa se o fundo é branco (ou seja, não tem nada ali)
+	if np.array_equal(img_np[x][y], color_white):
+		return False
+	else:
+		print(img_np[x][y])
+		print(color_white)
+		return True
+
+class DynamicObject:
+	def __init__(self, position, direction):
+		self.position = position
+		self.direction = direction
+
+		if direction == 'vertical':
+			senses = ['up', 'down']
+		else:
+			senses = ['left', 'right']
+
+		self.sense = random.choice(senses)
+
+	def step(self):
+
+		step_size = int(size/2)
+
+		old_x, old_y = self.position
+		if self.sense == 'up':
+			new_x, new_y = old_x + step_size, old_y
+		elif self.sense == 'down':
+			new_x, new_y = old_x - step_size, old_y
+		elif self.sense == 'left':
+			new_x, new_y = old_x, old_y + step_size
+		else:
+			# right
+			new_x, new_y = old_x, old_y - step_size
+
+		# Testa se já existe um objeto na nova posição
+		test_colision = check_colision(new_x, new_y)
+
+		if test_colision == True:
+			print("Test colision true")
+			if self.sense == 'up':
+				self.sense = 'down'
+			elif self.sense == 'down':
+				self.sense = 'up'
+			elif self.sense == 'left':
+				self.sense = 'right'
+			else:
+				# sense era right
+				self.sense = 'left'
+		else:
+			self.position = new_x, new_y
+
+			# Apaga desenho antigo
+			draw_square(old_x, old_y, color_white)
+
+			# Faz novo desenho
+			draw_square(new_x, new_y, color_black)
+
+
+
+
+
+def update_dyn_objects():
+	#len_dynamic_objets = len(dynamic_objects)
+	#if len_dynamic_objets > 0:
+		#print(dynamic_objects)
+		#print("Qtdade objetos dinâmicos ", len_dynamic_objets)
+	for dyn_object in dynamic_objects:
+		dyn_object.step()
+
+def add_dynamic_object(position, direction):
+	if direction == 'h':
+		direction = 'horizontal'
+	elif direction == 'v':
+		direction = 'vertical'
+	else:
+		print("Direção inválida, não foi possível criar objeto")
+		return False
+
+	x, y = position[0], position[1]
+	print("Adicionando objeto dinâmico, com posição inicial em: X " + str(x) + " Y " + str(y))
+	
+	new_dynamic_object = DynamicObject((x,y), direction)
+
+	dynamic_objects.append(new_dynamic_object)
+
+
+
 def add_static_object(position):
 	x, y = position[0], position[1]
 	print("Adicionando objeto estático em: X " + str(x) + " Y " + str(y))
@@ -197,7 +294,7 @@ def read_keyboard():
 # 	global running, x, y, img_np
 	global running
 
-	print("Digite q para sair, s X Y posicionar um objeto estático")
+	print("Digite q para sair, s X Y posicionar um objeto estático, d X Y h|v")
 
 	while running == True:
 
@@ -210,8 +307,19 @@ def read_keyboard():
 			running = False
 		# Put a static object
 		elif input_tokens[0] == 's':
-			new_position= (int(input_tokens[1]), int(input_tokens[2]))
-			add_static_object(new_position)
+			if len(input_tokens)!= 3:
+				print("Digite s X Y")
+			else:
+				new_position= (int(input_tokens[1]), int(input_tokens[2]))
+				add_static_object(new_position)
+		# Put a dynamic object
+		elif input_tokens[0] == 'd':
+			if len(input_tokens)!= 4:
+				print("Digite d X Y h|v")
+			else:
+				new_position= (int(input_tokens[1]), int(input_tokens[2]))
+				direction = input_tokens[3]
+				add_dynamic_object(new_position, direction)
 		#else:
 		#	print(input_tokens[0])
 # 		elif keyboard_input[0] == "w":
@@ -316,6 +424,7 @@ def draw_square(x, y, color):
 
 
 
+
 # def draw_destination(x, y):
 # 	global previous_x_destination, previous_y_destination, color_white, color_cyan
 # 	#print(type(x), type(y))
@@ -353,23 +462,30 @@ def draw_square(x, y, color):
 # # 0: none, 1: minimal, 2: maximal
 # debug_level = 1
 
-# Configura algumas cores comuns
-color_red = (255, 0, 0)
-color_white = (255, 255, 255)
-color_cyan = (0, 255, 255)
-color_black = (0, 0, 0)
-
-# pygame setup
-pygame.init()
-screen = pygame.display.set_mode((500, 500))
-clock = pygame.time.Clock()
-
 # Define que o programa pode começar a executar
 running = True
 dt = 0
 
 # Tamanho padrão dos objetos
 size = 30
+
+# Tamanho da tela
+max_screen_size = 500
+
+# Configura algumas cores comuns
+color_red = (255, 0, 0)
+
+# Fundo
+color_white = (255, 255, 255)
+color_cyan = (0, 255, 255)
+
+# Obstáculos móveis
+color_black = (0, 0, 0)
+
+# pygame setup
+pygame.init()
+screen = pygame.display.set_mode((max_screen_size, max_screen_size))
+clock = pygame.time.Clock()
 
 # # Define a posição do robô na tela 
 # x = int(screen.get_width() / 2)
@@ -451,7 +567,8 @@ keyboard_thread.start()
 # data = Image.fromarray(minimap.astype(np.uint8)) 
 # data.save('minimap.bmp') 
 
-
+# Cria uma lista, inicialmente vazia, de objetos que se movem
+dynamic_objects = []
 
 while running:
 	# poll for events
@@ -464,6 +581,8 @@ while running:
 # #	screen.fill("green")
 
 # 	#position = pygame.Vector2(x, y)
+
+	update_dyn_objects()
 	
  	# flip() the display to put your work on screen
 	pygame.display.flip()
