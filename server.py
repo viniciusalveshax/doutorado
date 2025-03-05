@@ -190,18 +190,44 @@ import threading
 # 	for position in minimap_path:
 # 		move_to_position(position)
 
-def check_colision(x, y):
+def check_colision(x, y, movement_sense):
+
+	#print("Testando colisão x=", x, " y=", y, " sense=", movement_sense)
 
 	# Testa limites da tela
 	if x < 0 or y < 0 or x > max_screen_size or y > max_screen_size:
 		return True
 
+	# (x,y) é o ponto médio da frente do objeto, 
+	# a frente do objeto é um segmento de reta, a partir do ponto médio calcule 
+	# dois pontos, um pra esquerda e um pra direita
+	step_size = int(size/2)
+
+	if movement_sense == 'up':
+		x_left, y_left = x - step_size, y
+		x_right, y_right = x + step_size, y
+	elif movement_sense == 'down':
+		x_left, y_left = x + step_size, y
+		x_right, y_right = x - step_size, y
+	elif movement_sense == 'left':
+		x_left, y_left = x, y - step_size
+		x_right, y_right = x, y + step_size
+	else:
+		# sense = right
+		x_left, y_left = x, y + step_size
+		x_right, y_right = x, y - step_size
+
+		
+	#print("Testando para ponto no meio ", x, y)	
+	#print("Testando para ponto na esquerda ", x_left, y_left)
+	#print("Testando para ponto na direita ", x_right, y_right)
+
 	# Testa se o fundo é branco (ou seja, não tem nada ali)
-	if np.array_equal(img_np[x][y], color_white):
+	if np.array_equal(img_np[x][y], color_white) and np.array_equal(img_np[x_left][y_left], color_white) and np.array_equal(img_np[x_right][y_right], color_white):
 		return False
 	else:
-		print(img_np[x][y])
-		print(color_white)
+		print(img_np[x][y], img_np[x_left][y_left], img_np[x_right][y_right])
+		#print(color_white)
 		return True
 
 class DynamicObject:
@@ -218,21 +244,26 @@ class DynamicObject:
 
 	def step(self):
 
-		step_size = int(size/2)
+		test_size = int(size/2) + 1
 
 		old_x, old_y = self.position
+		new_x, new_y = old_x, old_y
 		if self.sense == 'up':
-			new_x, new_y = old_x + step_size, old_y
+			test_x, test_y = old_x, old_y - test_size
+			new_y = new_y - 1
 		elif self.sense == 'down':
-			new_x, new_y = old_x - step_size, old_y
+			test_x, test_y = old_x, old_y + test_size
+			new_y = new_y + 1
 		elif self.sense == 'left':
-			new_x, new_y = old_x, old_y + step_size
+			test_x, test_y = old_x - test_size, old_y
+			new_x = new_x - 1
 		else:
 			# right
-			new_x, new_y = old_x, old_y - step_size
+			test_x, test_y = old_x + test_size, old_y
+			new_x = new_x + 1
 
 		# Testa se já existe um objeto na nova posição
-		test_colision = check_colision(new_x, new_y)
+		test_colision = check_colision(test_x, test_y, self.sense)
 
 		if test_colision == True:
 			print("Test colision true")
@@ -417,6 +448,8 @@ def draw_square(x, y, color):
 	x = int(x - size/2)
 	y = int(y - size/2)
 
+	#if color == color_black:
+	#	print("Draw from x ", x, " until x+size", x+size, " y ", y, " , y+size", y+size)
 	img_np[x:x+size, y:y+size] = color
 
 	update_screen()
