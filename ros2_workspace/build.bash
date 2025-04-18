@@ -1,4 +1,5 @@
-PACKAGE_NAME=map_share
+#PACKAGE_NAME=map_share
+PACKAGE_NAME=simulator
 
 #echo "Verificando dependências ..."
 #rosdep install -i --from-path src --rosdistro humble -y
