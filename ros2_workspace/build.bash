@@ -20,3 +20,8 @@ echo
 echo "Rodando $1 ..."
 ros2 run $PACKAGE_NAME $1
 
+
+### Testar serviço
+# ros2 service call /get_map_data map_interfaces/srv/GetMapData
+### Testar tópico
+# ros2 topic echo /map_info
