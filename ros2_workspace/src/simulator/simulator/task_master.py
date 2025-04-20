@@ -12,6 +12,14 @@ import time
 # Para lançar a thread do teclado
 import threading
 
+# To load image
+from PIL import Image
+import numpy as np
+
+#from map_interfaces.msg import GetMapInfo
+from map_interfaces.srv import GetMapData #, SendMsgServer
+
+
 class MinimalPublisher(Node):
 
 	def __init__(self):
@@ -34,6 +42,18 @@ class MinimalService(Node):
 		super().__init__(node_name)
 		#        self.srv = self.create_service(GetMapData, 'get_map_data', self.get_map_data_callback)
 		self.srv = self.create_service(server_interface_type, topic_name, self.callback_method)
+
+class MapService(MinimalService):
+	def callback_method(self, request, response):
+		#global map
+		#self.get_logger().info('Incoming request\na: %d b: %d' % (request.a, request.b))
+		self.get_logger().info('Incoming request')
+
+		response.data = ['Test string'] #map.content() 
+
+		print("Vou retornar")
+
+		return response
 
 def start_ros_nodes():
 	global rclpy
@@ -58,9 +78,14 @@ def start_ros_nodes():
 		executor = MultiThreadedExecutor()
 
 		executor.add_node(node)
+		
+		# Lê o arquivo bmp e converte para numpy
+		img = Image.open("/home/vinicius/s/doutorado/map2.bmp")
+		img_np = np.array(img)
+		start_background = np.copy(img_np)
 
-#		get_map_service = MapService('node_get_map', GetMapData, 'get_map_data')
-#		executor.add_node(get_map_service)
+		get_map_service = MapService('node_get_map', GetMapData, 'get_map_data')
+		executor.add_node(get_map_service)
 
 #		receive_msg_service = ReceiveMsgService('node_receive_msg', SendMsgServer, 'send_msg_server')
 #		executor.add_node(receive_msg_service)
@@ -76,12 +101,12 @@ def start_ros_nodes():
 			executor.shutdown()
 			#node_publisher.destroy_node()
 #			receive_msg_service.destroy_node()
-#			get_map_service.destroy_node()
+			node.destroy_node()
+			get_map_service.destroy_node()
 
 	finally:
 		# Destroi o nodo publicador
 		print("Encerrando a execução do ROS")
-		node.destroy_node()
 		rclpy.shutdown()
 
 
