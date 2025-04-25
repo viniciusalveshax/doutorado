@@ -1,0 +1,8 @@
+Nova interface:
+	Criar o arquivo do pacote (.srv)
+	Adicionar o arquivo em CMakeLists.txt
+	Recompilar (colcon build)
+	
+	Teste com
+		ros2 interface show PACOTE/srv/NOME_INTERFACE
+		Ex: ros2 interface show map_interfaces/srv/GetMapSerial
