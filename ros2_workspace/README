@@ -6,3 +6,8 @@ Nova interface:
 	Teste com
 		ros2 interface show PACOTE/srv/NOME_INTERFACE
 		Ex: ros2 interface show map_interfaces/srv/GetMapSerial
+		
+	Teste de acesso da interface
+		ros2 service call /TOPIC_NAME PACOTE/srv/NOME_INTERFACE
+		Ex: ros2 service call /get_map_dims map_interfaces/srv/GetMapDims
+

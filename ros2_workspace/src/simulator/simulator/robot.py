@@ -2,7 +2,7 @@
 import rclpy
 from rclpy.node import Node
 
-from map_interfaces.srv import GetMapData #, SendMsgServer
+from map_interfaces.srv import GetMapDims, GetMapSerial #, SendMsgServer
 
 
 class MinimalClientAsync(Node):
@@ -29,14 +29,15 @@ def main(args=None):
 	#executor = MultiThreadedExecutor()
 
 	# Nó para requisitar dados do mapa
-	minimal_client = MinimalClientAsync('node_get_data', GetMapData, 'get_map_data')
+	minimal_client = MinimalClientAsync('node_get_map_dims', GetMapDims, 'get_map_dims')
 	#executor.add_node(minimal_client)
 
+	print("Enviando requisição get_map_dims")
 	future_request = minimal_client.send_request()
 	rclpy.spin_until_future_complete(minimal_client, future_request)
-	print("Requisição concluída")
+	print("Requisição concluída. Dimensões do mapa:")
 	request_response = future_request.result()
-	print(request_response)
+	print(request_response.data)
 
 
 

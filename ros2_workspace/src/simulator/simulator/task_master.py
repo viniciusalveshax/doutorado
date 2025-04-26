@@ -17,7 +17,7 @@ from PIL import Image
 import numpy as np
 
 #from map_interfaces.msg import GetMapInfo
-from map_interfaces.srv import GetMapData #, SendMsgServer
+from map_interfaces.srv import GetMapData, GetMapDims #, SendMsgServer
 
 
 class MinimalPublisher(Node):
@@ -54,6 +54,20 @@ class MapService(MinimalService):
 		print("Vou retornar")
 
 		return response
+		
+class MapDimsService(MinimalService):
+	def callback_method(self, request, response):
+		#global map
+		#self.get_logger().info('Incoming request\na: %d b: %d' % (request.a, request.b))
+		self.get_logger().info('Map Dims Incoming request')
+
+		response.data = (720, 720, 3) #map.content() 
+
+		print("Respondi as dimensões do mapa")
+
+		return response
+
+
 
 def start_ros_nodes():
 	global rclpy
@@ -83,6 +97,10 @@ def start_ros_nodes():
 		img = Image.open("/home/vinicius/s/doutorado/map2.bmp")
 		img_np = np.array(img)
 		start_background = np.copy(img_np)
+		serialized_map = img_np.reshape(-1)
+
+		provide_map_dims_service = MapDimsService('node_provide_data_dims', GetMapDims, 'get_map_dims')
+		executor.add_node(provide_map_dims_service)
 
 		get_map_service = MapService('node_get_map', GetMapData, 'get_map_data')
 		executor.add_node(get_map_service)
