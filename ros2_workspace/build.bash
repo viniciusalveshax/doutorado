@@ -17,7 +17,7 @@ cp -f ../astar.py install/map_share/lib/map_share/astar.py
 cp -f map.py install/map_share/lib/map_share/map.py
 
 echo
-echo "Rodando $1 ..."
+echo "Rodando programa de nome: $1 ..."
 ros2 run $PACKAGE_NAME $1
 
 
