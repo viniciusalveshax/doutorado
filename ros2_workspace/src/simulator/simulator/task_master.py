@@ -17,7 +17,7 @@ from PIL import Image
 import numpy as np
 
 #from map_interfaces.msg import GetMapInfo
-from map_interfaces.srv import GetMapData, GetMapDims #, SendMsgServer
+from map_interfaces.srv import GetMapData, GetMapDims, GetMapSerial #, SendMsgServer
 
 
 class MinimalPublisher(Node):
@@ -67,6 +67,28 @@ class MapDimsService(MinimalService):
 
 		return response
 
+class MapSerialService(MinimalService):
+	def callback_method(self, request, response):
+		global serialized_map
+		#self.get_logger().info('Incoming request\na: %d b: %d' % (request.a, request.b))
+		self.get_logger().info('Map Serial Incoming request 720')
+
+		# Lê o arquivo bmp e converte para numpy
+		img = Image.open("/home/vinicius/s/doutorado/map2.bmp")
+		img_np = np.array(img)
+		start_background = np.copy(img_np)
+		serialized_map = img_np.reshape(-1)
+		
+		# Aparentemente não é possível enviar um array numpy então preciso converter para python
+		# TODO Verificar se img já não é a mesma informação
+		response.data = serialized_map.tolist() #map.content() 
+		#response.data = [1, 2, 3, 4]
+
+		print("Enviei a versão atual do mapa")
+
+		return response
+
+
 
 
 def start_ros_nodes():
@@ -93,17 +115,11 @@ def start_ros_nodes():
 
 		executor.add_node(node)
 		
-		# Lê o arquivo bmp e converte para numpy
-		img = Image.open("/home/vinicius/s/doutorado/map2.bmp")
-		img_np = np.array(img)
-		start_background = np.copy(img_np)
-		serialized_map = img_np.reshape(-1)
-
 		provide_map_dims_service = MapDimsService('node_provide_data_dims', GetMapDims, 'get_map_dims')
 		executor.add_node(provide_map_dims_service)
 
-		get_map_service = MapService('node_get_map', GetMapData, 'get_map_data')
-		executor.add_node(get_map_service)
+		provide_map_serial = MapSerialService('node_get_map_serial', GetMapSerial, 'get_map_serial')
+		executor.add_node(provide_map_serial)
 
 #		receive_msg_service = ReceiveMsgService('node_receive_msg', SendMsgServer, 'send_msg_server')
 #		executor.add_node(receive_msg_service)
@@ -120,7 +136,7 @@ def start_ros_nodes():
 			#node_publisher.destroy_node()
 #			receive_msg_service.destroy_node()
 			node.destroy_node()
-			get_map_service.destroy_node()
+			get_map_serial.destroy_node()
 
 	finally:
 		# Destroi o nodo publicador
