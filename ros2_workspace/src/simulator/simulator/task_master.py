@@ -8,7 +8,6 @@ from std_msgs.msg import String
 # Para gerar o timestamp
 import time
 
-
 # Para lançar a thread do teclado
 import threading
 
@@ -17,8 +16,7 @@ from PIL import Image
 import numpy as np
 
 #from map_interfaces.msg import GetMapInfo
-from map_interfaces.srv import GetMapData, GetMapDims, GetMapSerial #, SendMsgServer
-
+from map_interfaces.srv import GetMapData, GetMapDims, GetMapSerial, RememberRobotData #, SendMsgServer
 
 class MinimalPublisher(Node):
 
@@ -89,6 +87,23 @@ class MapSerialService(MinimalService):
 		return response
 
 
+class RobotDataService(MinimalService):
+	def callback_method(self, request, response):
+		self.get_logger().info('Solicitando informações de robo')
+
+		mac_address = request.mac
+
+		print('O robô com mac ', mac_address, 'está pedindo informações')
+		
+		response.x_position = 25
+		response.y_position = 50 
+		response.robot_name = "Wall E"
+		
+		print("Enviando as informações do robô")
+
+		return response
+
+
 
 
 def start_ros_nodes():
@@ -120,6 +135,10 @@ def start_ros_nodes():
 
 		provide_map_serial = MapSerialService('node_get_map_serial', GetMapSerial, 'get_map_serial')
 		executor.add_node(provide_map_serial)
+		
+		provide_robot_data = RobotDataService('node_get_robot_data', RememberRobotData, 'get_robot_data')
+		executor.add_node(provide_robot_data)
+
 
 #		receive_msg_service = ReceiveMsgService('node_receive_msg', SendMsgServer, 'send_msg_server')
 #		executor.add_node(receive_msg_service)

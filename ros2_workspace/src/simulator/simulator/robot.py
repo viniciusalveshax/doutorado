@@ -7,7 +7,7 @@ import numpy as np
 import rclpy
 from rclpy.node import Node
 
-from map_interfaces.srv import GetMapDims, GetMapSerial #, SendMsgServer
+from map_interfaces.srv import GetMapDims, GetMapSerial, RememberRobotData #, SendMsgServer
 
 
 class MinimalClientAsync(Node):
@@ -25,6 +25,22 @@ class MinimalClientAsync(Node):
 		#self.req.b = b
 		return self.cli.call_async(self.req)
 
+class ClientGetRobotData(Node):
+
+	def __init__(self, node_name, server_interface_type, topic_name):
+		super().__init__(node_name)
+		#self.cli = self.create_client(GetMapData, 'get_map_data')
+		self.cli = self.create_client(server_interface_type, topic_name)
+		while not self.cli.wait_for_service(timeout_sec=1.0):
+			self.get_logger().info('service not available, waiting again...')
+		self.req = server_interface_type.Request()
+
+	def send_request(self):
+		#mac = "06:11:aa:bb:c1:d9"
+		self.req.mac = "06:11:aa:bb:c1:d9"
+		#self.req.a = a
+		#self.req.b = b
+		return self.cli.call_async(self.req)
 
 
 def main(args=None):
@@ -66,6 +82,16 @@ def main(args=None):
 	
 	np_array = np.array(request_response.data)
 	array2d = np_array.reshape(map_dimensions)
+
+	print("Requisitando informações a respeito do robô (posição e nome)")
+	get_robot_data_client = ClientGetRobotData('node_get_robot_data', RememberRobotData, 'get_robot_data')
+	future_request = get_robot_data_client.send_request()
+	rclpy.spin_until_future_complete(get_robot_data_client, future_request)
+	request_response = future_request.result()	
+	print("Informações sobre o robô recebidas.")
+	print(request_response)
+
+
 
 	while running:
 		# poll for events

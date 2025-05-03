@@ -1,0 +1,5 @@
+string mac
+---
+uint8 x_position
+uint8 y_position
+string robot_name
