@@ -9,6 +9,13 @@ from rclpy.node import Node
 
 from map_interfaces.srv import GetMapDims, GetMapSerial, RememberRobotData #, SendMsgServer
 
+color_black = (0, 0, 0)
+
+# Tamanho padrão do "robô"
+size = 30
+
+# Cria um array vazio para depois ser usado globalmente
+array2d = np.empty(1)
 
 class MinimalClientAsync(Node):
 
@@ -43,7 +50,17 @@ class ClientGetRobotData(Node):
 		return self.cli.call_async(self.req)
 
 
+def draw_square(x, y, color):
+	global array2d
+	
+	#Descobre a diagonal do robô
+	x0 = int(x - size/2)
+	y0 = int(y - size/2)
+
+	array2d[x0:x0+size, y0:y0+size] = color
+
 def main(args=None):
+	global array2d
 
 	# pygame setup
 	pygame.init()
@@ -51,9 +68,7 @@ def main(args=None):
 	clock = pygame.time.Clock()
 	running = True
 	dt = 0
-
-	# Tamanho padrão do "robô"
-	size = 30
+	my_position = (0,0)
 
 	# Inialização do ROS
 	rclpy.init(args=args)
@@ -90,7 +105,8 @@ def main(args=None):
 	request_response = future_request.result()	
 	print("Informações sobre o robô recebidas.")
 	print(request_response)
-
+	my_position = (request_response.x_position, request_response.y_position)
+	draw_square(my_position[0], my_position[1], color_black)
 
 
 	while running:
