@@ -216,7 +216,7 @@ def publish_bulletin(publisher, content = ''):
 	msg = String()
 
 	#map_info_msg.timestamp = '%d' % i
-	msg.data = str(i) + content
+	msg.data = str(i) + ' ' + content
 
 	#bulletin_publisher.publish(msg)
 	publisher.publish(msg)
