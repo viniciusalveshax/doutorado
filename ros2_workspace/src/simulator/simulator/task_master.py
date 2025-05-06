@@ -11,12 +11,42 @@ import time
 # Para lançar a thread do teclado
 import threading
 
+# Para encontrar a posição inicial do robô
+import random 
+
 # To load image
 from PIL import Image
 import numpy as np
 
 #from map_interfaces.msg import GetMapInfo
 from map_interfaces.srv import GetMapData, GetMapDims, GetMapSerial, RememberRobotData #, SendMsgServer
+
+color_white = (255, 255, 255)
+
+def empty_space(img_np, x, y):
+	print(img_np[x][y])
+
+	#global img_np
+	if np.array_equal(img_np[x][y],color_white) and np.array_equal(img_np[x][y],img_np[x-15][y])  and np.array_equal(img_np[x][y],img_np[x+15][y])  and np.array_equal(img_np[x][y],img_np[x][y-15])  and np.array_equal(img_np[x][y],img_np[x][y+15]):
+		return True
+	else:
+		return False
+
+def find_space_to_place_robot():
+	print("Entrei na função que procura um lugar vazio")
+	
+	# Lê o arquivo bmp e converte para numpy
+	img = Image.open("/home/vinicius/s/doutorado/map2.bmp")
+	img_np = np.array(img)
+
+	test_x = random.randint(0, 720)
+	test_y = random.randint(0, 720)
+	while empty_space(img_np, test_x, test_y) == False:
+		test_x = random.randint(0, 720)
+		test_y = random.randint(0, 720)
+		print("Novo teste de posição ...")
+
+	return (test_x, test_y)		
 
 class MinimalPublisher(Node):
 
@@ -94,10 +124,17 @@ class RobotDataService(MinimalService):
 		mac_address = request.mac
 
 		print('O robô com mac ', mac_address, 'está pedindo informações')
+
+		(x, y) = find_space_to_place_robot()
 		
-		response.x_position = 25
-		response.y_position = 50 
-		response.robot_name = "Wall E"
+		available_names = ["Wall E", "Johnny V", "ED209"]
+		#TODO Prevent name reutilization
+		choosed_name = random.choice(available_names)	
+
+		response.x_position = x
+		response.y_position = y 
+		response.robot_name = choosed_name
+	
 		
 		print("Enviando as informações do robô")
 
