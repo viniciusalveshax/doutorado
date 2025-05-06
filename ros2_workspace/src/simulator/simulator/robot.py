@@ -17,6 +17,7 @@ from map_interfaces.srv import GetMapDims, GetMapSerial, RememberRobotData #, Se
 from std_msgs.msg import String
 
 color_black = (0, 0, 0)
+color_red = (255, 0, 0)
 
 # Tamanho padrão do "robô"
 size = 30
@@ -25,6 +26,9 @@ size = 30
 array2d = np.empty(1)
 
 control = {}
+
+MAX_X = 720
+MAX_Y = 720
 
 class MinimalSubscriber(Node):
 	def __init__(self):
@@ -49,6 +53,7 @@ class MinimalSubscriber(Node):
 			y = int(y_str.split("Y=")[1])
 			control["destiny"] = (x,y)
 			control["available"] = False
+			control["first_step"] = True
 
 class MinimalClientAsync(Node):
 
@@ -86,11 +91,27 @@ class ClientGetRobotData(Node):
 def draw_square(x, y, color):
 	global array2d
 	
-	#Descobre a diagonal do robô
+	#Calcula o ponto do início do desenho
 	x0 = int(x - size/2)
 	y0 = int(y - size/2)
+	
+	# Se o quadrado estiver abaixao das dimensão da tela faz um ajuste
+	if x0 < 0:
+		x0 = 0
+	if y0 < 0:
+		y0 = 0
+		
+	# Calcula o ponto do final do desenho
+	delta_x = x0 + size
+	delta_y = y0 + size
+	
+	# Se o quadrado estiver acima dos valores das dimensões da tela faz um ajuste
+	if delta_x > MAX_X:
+		delta_x = MAX_X
+	if delta_y > MAX_Y:
+		delta_y = MAX_Y
 
-	array2d[x0:x0+size, y0:y0+size] = color
+	array2d[x0:delta_x, y0:delta_y] = color
 	
 def check_updates(control):
 	
@@ -104,14 +125,32 @@ def check_updates(control):
 	subscriber.destroy_node()
 	rclpy.shutdown()
 
+# Ciclo de simulação do robô
 def robot_step():
-	global control
+	global control, screen
 
 	if control["available"] == True:
 		print("Nada pra fazer ...")
 	else:
 		print("Tenho algo para fazer. Vou para:")
 		print(control["destiny"])
+
+		# Se a ordem é nova
+		if control["first_step"] == True:
+			# Marca o destino
+			(x,y) = control["destiny"]
+			screen = control["screen"]
+			draw_square(x, y, color_red)
+			surf = pygame.surfarray.make_surface(array2d)
+			screen.blit(surf, (0, 0))
+			
+			# Planeja o caminho
+			
+			
+			control["first_step"] = False
+		else:
+			# Executa o que foi planejado
+			print("Já planejei. Agora vou executar")		
 	time.sleep(1)
 
 
@@ -126,6 +165,7 @@ def main(args=None):
 	dt = 0
 	my_position = (0,0)
 	control["available"] = True
+	control['screen'] = screen
 
 	# Inialização do ROS
 	rclpy.init(args=args)
@@ -165,7 +205,7 @@ def main(args=None):
 	my_position = (request_response.x_position, request_response.y_position)
 	draw_square(my_position[0], my_position[1], color_black)
 
-	bulletin_thread = threading.Thread(target=check_updates, args=(control))
+	bulletin_thread = threading.Thread(target=check_updates, args=(control,))
 	bulletin_thread.start()
 
 	while running:
