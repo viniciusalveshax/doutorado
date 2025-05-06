@@ -3,11 +3,15 @@ import pygame
 
 import numpy as np
 
+# Para monitorar o tópico com novidades vindo do master
+import threading
+
 # Bibliotecas do ROS2
 import rclpy
 from rclpy.node import Node
 
 from map_interfaces.srv import GetMapDims, GetMapSerial, RememberRobotData #, SendMsgServer
+from std_msgs.msg import String
 
 color_black = (0, 0, 0)
 
@@ -16,6 +20,19 @@ size = 30
 
 # Cria um array vazio para depois ser usado globalmente
 array2d = np.empty(1)
+
+class MinimalSubscriber(Node):
+	def __init__(self):
+		super().__init__('minimal_subscriber')
+		self.subscription = self.create_subscription(
+		    String,
+		    'map_info',
+		    self.listener_callback,
+		    10)
+		self.subscription  # prevent unused variable warning
+
+	def listener_callback(self, msg):
+		self.get_logger().info('Recebi: "%s"' % msg.data)
 
 class MinimalClientAsync(Node):
 
@@ -58,6 +75,19 @@ def draw_square(x, y, color):
 	y0 = int(y - size/2)
 
 	array2d[x0:x0+size, y0:y0+size] = color
+	
+def check_updates():
+	
+	subscriber = MinimalSubscriber()
+
+	rclpy.spin(subscriber)
+
+	# Destroy the node explicitly
+	# (optional - otherwise it will be done automatically
+	# when the garbage collector destroys the node object)
+	subscriber.destroy_node()
+	rclpy.shutdown()
+
 
 def main(args=None):
 	global array2d
@@ -108,6 +138,8 @@ def main(args=None):
 	my_position = (request_response.x_position, request_response.y_position)
 	draw_square(my_position[0], my_position[1], color_black)
 
+	bulletin_thread = threading.Thread(target=check_updates)
+	bulletin_thread.start()
 
 	while running:
 		# poll for events
@@ -132,6 +164,10 @@ def main(args=None):
 		# dt is delta time in seconds since last frame, used for framerate-
 		# independent physics.
 		dt = clock.tick(10) / 1000
+		
+	rclpy.shutdown()
+	#TODO End thread	
+	#bulletin_thread.stop()
 	
 
 if __name__ == '__main__':
