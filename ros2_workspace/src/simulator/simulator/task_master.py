@@ -25,12 +25,20 @@ color_white = (255, 255, 255)
 
 def empty_space(img_np, x, y):
 	print(img_np[x][y])
-
-	#global img_np
-	if np.array_equal(img_np[x][y],color_white) and np.array_equal(img_np[x][y],img_np[x-15][y])  and np.array_equal(img_np[x][y],img_np[x+15][y])  and np.array_equal(img_np[x][y],img_np[x][y-15])  and np.array_equal(img_np[x][y],img_np[x][y+15]):
-		return True
+	
+	#TODO Melhorar esse algoritmo aqui
+	# Se está próximo da borda então está só o centro
+	if x < 15 or y < 15 or x > 700 or y > 700:
+		if np.array_equal(img_np[x][y],color_white):
+			return True
+		else:
+			return False
+	# se não está tão próximo das bordas testa as diagonais também
 	else:
-		return False
+		if np.array_equal(img_np[x][y],color_white) and np.array_equal(img_np[x][y],img_np[x-15][y])  and np.array_equal(img_np[x][y],img_np[x+15][y])  and np.array_equal(img_np[x][y],img_np[x][y-15])  and np.array_equal(img_np[x][y],img_np[x][y+15]):
+			return True
+		else:
+			return False
 
 def find_space_to_place_robot():
 	print("Entrei na função que procura um lugar vazio")
