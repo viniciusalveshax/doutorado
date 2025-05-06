@@ -6,6 +6,9 @@ import numpy as np
 # Para monitorar o tópico com novidades vindo do master
 import threading
 
+# Para desacelerar o tempo de simulação
+import time
+
 # Bibliotecas do ROS2
 import rclpy
 from rclpy.node import Node
@@ -21,6 +24,8 @@ size = 30
 # Cria um array vazio para depois ser usado globalmente
 array2d = np.empty(1)
 
+control = {}
+
 class MinimalSubscriber(Node):
 	def __init__(self):
 		super().__init__('minimal_subscriber')
@@ -32,7 +37,18 @@ class MinimalSubscriber(Node):
 		self.subscription  # prevent unused variable warning
 
 	def listener_callback(self, msg):
+		global control
+	
+	
 		self.get_logger().info('Recebi: "%s"' % msg.data)
+		if control["available"] and ("Solicitando" in msg.data):
+			splitted_msg = msg.data.split()
+			x_str = splitted_msg[4]
+			y_str = splitted_msg[6]
+			x = int(x_str.split("X=")[1])
+			y = int(y_str.split("Y=")[1])
+			control["destiny"] = (x,y)
+			control["available"] = False
 
 class MinimalClientAsync(Node):
 
@@ -76,7 +92,7 @@ def draw_square(x, y, color):
 
 	array2d[x0:x0+size, y0:y0+size] = color
 	
-def check_updates():
+def check_updates(control):
 	
 	subscriber = MinimalSubscriber()
 
@@ -87,6 +103,16 @@ def check_updates():
 	# when the garbage collector destroys the node object)
 	subscriber.destroy_node()
 	rclpy.shutdown()
+
+def robot_step():
+	global control
+
+	if control["available"] == True:
+		print("Nada pra fazer ...")
+	else:
+		print("Tenho algo para fazer. Vou para:")
+		print(control["destiny"])
+	time.sleep(1)
 
 
 def main(args=None):
@@ -99,6 +125,7 @@ def main(args=None):
 	running = True
 	dt = 0
 	my_position = (0,0)
+	control["available"] = True
 
 	# Inialização do ROS
 	rclpy.init(args=args)
@@ -138,7 +165,7 @@ def main(args=None):
 	my_position = (request_response.x_position, request_response.y_position)
 	draw_square(my_position[0], my_position[1], color_black)
 
-	bulletin_thread = threading.Thread(target=check_updates)
+	bulletin_thread = threading.Thread(target=check_updates, args=(control))
 	bulletin_thread.start()
 
 	while running:
@@ -154,8 +181,7 @@ def main(args=None):
 		surf = pygame.surfarray.make_surface(array2d)
 		screen.blit(surf, (0, 0))
 
-
-		#position = pygame.Vector2(x, y)
+		robot_step()
 		
 		# flip() the display to put your work on screen
 		pygame.display.flip()
