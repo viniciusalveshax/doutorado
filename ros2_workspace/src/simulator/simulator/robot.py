@@ -16,6 +16,9 @@ from rclpy.node import Node
 from map_interfaces.srv import GetMapDims, GetMapSerial, RememberRobotData #, SendMsgServer
 from std_msgs.msg import String
 
+# Algoritmo do A*
+from astar import AStar
+
 color_black = (0, 0, 0)
 color_red = (255, 0, 0)
 
@@ -26,7 +29,7 @@ size = 30
 array2d = np.empty(1)
 
 control = {}
-
+my_position = (0,0)
 MAX_X = 720
 MAX_Y = 720
 
@@ -138,13 +141,23 @@ def robot_step():
 		# Se a ordem é nova
 		if control["first_step"] == True:
 			# Marca o destino
-			(x,y) = control["destiny"]
+			(x_destiny,y_destiny) = control["destiny"]
 			screen = control["screen"]
-			draw_square(x, y, color_red)
+			draw_square(x_destiny, y_destiny, color_red)
 			surf = pygame.surfarray.make_surface(array2d)
 			screen.blit(surf, (0, 0))
 			
 			# Planeja o caminho
+			maze = AStar(map=array2d, start=my_position, end=(x_destiny, y_destiny), debug=True)
+			if maze.solve() == True:
+				print("Foi possível resolver")
+				#maze_path.print_map_with_solution()
+				maze_path = maze.get_path()
+				print(maze_path)
+				#draw_path(maze_path)
+			else:
+				print("Não foi possível resolver")
+
 			
 			
 			control["first_step"] = False
@@ -163,7 +176,6 @@ def main(args=None):
 	clock = pygame.time.Clock()
 	running = True
 	dt = 0
-	my_position = (0,0)
 	control["available"] = True
 	control['screen'] = screen
 

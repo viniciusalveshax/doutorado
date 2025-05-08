@@ -13,8 +13,8 @@ echo "Recarregando o ambiente ..."
 source install/setup.bash
 
 # Sobrescrevendo arquivo com classes diversas
-cp -f ../astar.py install/map_share/lib/map_share/astar.py
-cp -f map.py install/map_share/lib/map_share/map.py
+cp -f ../astar.py install/${PACKAGE_NAME}/lib/${PACKAGE_NAME}/astar.py
+#cp -f map.py install/${PACKAGE_NAME}/lib/${PACKAGE_NAME}/map.py
 
 echo
 echo "Rodando programa de nome: $1 ..."
