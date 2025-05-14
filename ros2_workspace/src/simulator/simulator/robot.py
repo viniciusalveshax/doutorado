@@ -128,6 +128,16 @@ def check_updates(control):
 	subscriber.destroy_node()
 	rclpy.shutdown()
 
+def draw_path(path_list):
+	global array2d
+	tmp_size = 1
+	for node in path_list:
+		x, y = node
+		array2d[x:x+tmp_size, y:y+tmp_size] = (0, 255, 0)
+	surf = pygame.surfarray.make_surface(array2d)
+	screen.blit(surf, (0, 0))
+
+
 # Ciclo de simulação do robô
 def robot_step():
 	global control, screen
@@ -146,7 +156,8 @@ def robot_step():
 			draw_square(x_destiny, y_destiny, color_red)
 			surf = pygame.surfarray.make_surface(array2d)
 			screen.blit(surf, (0, 0))
-			
+			my_position = control["my_position"]
+			print("Minha posição:", my_position, " meu destino ", (x_destiny,y_destiny))
 			# Planeja o caminho
 			maze = AStar(map=array2d, start=my_position, end=(x_destiny, y_destiny), debug=True)
 			if maze.solve() == True:
@@ -154,7 +165,7 @@ def robot_step():
 				#maze_path.print_map_with_solution()
 				maze_path = maze.get_path()
 				print(maze_path)
-				#draw_path(maze_path)
+				draw_path(maze_path)
 			else:
 				print("Não foi possível resolver")
 
@@ -216,6 +227,7 @@ def main(args=None):
 	print(request_response)
 	my_position = (request_response.x_position, request_response.y_position)
 	draw_square(my_position[0], my_position[1], color_black)
+	control["my_position"] = my_position
 
 	bulletin_thread = threading.Thread(target=check_updates, args=(control,))
 	bulletin_thread.start()
