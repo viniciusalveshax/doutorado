@@ -19,6 +19,7 @@ from std_msgs.msg import String
 # Algoritmo do A*
 from astar import AStar
 
+color_white = (255, 255, 255)
 color_black = (0, 0, 0)
 color_green = (0, 255, 0)
 color_red = (255, 0, 0)
@@ -138,6 +139,20 @@ def draw_path(path_list):
 	surf = pygame.surfarray.make_surface(array2d)
 	screen.blit(surf, (0, 0))
 
+def walk_one_step():
+	maze_path = control["maze_path"]
+	next_position = maze_path[0]
+	print("Desenhando na próxima posição", next_position)
+	my_position = control["my_position"]
+	draw_square(my_position[0], my_position[1], color_white)
+	draw_square(next_position[0], next_position[1], color_green)
+	# Remove a posição do labirinto
+	if len(maze_path) > 0:
+		control["maze_path"] = maze_path[1:]
+	else:
+		control["available"] = True
+		print("Cheguei no objetivo. Disponível para outra tarefa.")	
+	pygame.time.wait(50)
 
 # Ciclo de simulação do robô
 def robot_step():
@@ -165,6 +180,7 @@ def robot_step():
 				print("Foi possível resolver")
 				#maze_path.print_map_with_solution()
 				maze_path = maze.get_path()
+				control["maze_path"] = maze_path
 				print(maze_path)
 				draw_path(maze_path)
 			else:
@@ -175,7 +191,9 @@ def robot_step():
 			control["first_step"] = False
 		else:
 			# Executa o que foi planejado
-			print("Já planejei. Agora vou executar")		
+			print("Já planejei. Agora vou executar")
+			walk_one_step()
+					
 	time.sleep(1)
 
 
