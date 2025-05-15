@@ -1,3 +1,4 @@
 string robot_name
+uint16 task_id
 ---
 bool response

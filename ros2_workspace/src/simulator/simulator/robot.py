@@ -13,7 +13,7 @@ import time
 import rclpy
 from rclpy.node import Node
 
-from map_interfaces.srv import GetMapDims, GetMapSerial, RememberRobotData #, SendMsgServer
+from map_interfaces.srv import GetMapDims, GetMapSerial, RememberRobotData, AcceptTask #, SendMsgServer
 from std_msgs.msg import String
 
 # Algoritmo do A*
@@ -52,13 +52,29 @@ class MinimalSubscriber(Node):
 		self.get_logger().info('Recebi: "%s"' % msg.data)
 		if control["available"] and ("Solicitando" in msg.data):
 			splitted_msg = msg.data.split()
-			x_str = splitted_msg[4]
-			y_str = splitted_msg[6]
+			# Formato da mensagem 
+			# timestamp + "Tarefa " + task_id + " : Solicitando robô em X=" + x + " e Y=" + y
+			task_id = int(splitted_msg[2])
+			x_str = splitted_msg[7]
+			y_str = splitted_msg[9]
 			x = int(x_str.split("X=")[1])
 			y = int(y_str.split("Y=")[1])
-			control["destiny"] = (x,y)
-			control["available"] = False
-			control["first_step"] = True
+
+			# Nó para aceitar tarefa
+			accept_task_client = AcceptTaskClient('node_accept_task', AcceptTask, 'accept_task')
+			print("Enviando requisição para aceitar a tarefa")
+			future_request = accept_task_client.send_request(task_id, control["my_name"])
+			rclpy.spin_until_future_complete(accept_task_client, future_request)
+			request_response = future_request.result()
+	
+			# Verifica se a tarefa ainda está disponível
+			if request_response.response == True:
+				print("Aceitei a tarefa ", task_id)
+				control["destiny"] = (x,y)
+				control["available"] = False
+				control["first_step"] = True
+			else:
+				print("A tarefa ", task_id, " não estava mais disponível")
 
 class MinimalClientAsync(Node):
 
@@ -90,6 +106,21 @@ class ClientGetRobotData(Node):
 		self.req.mac = "06:11:aa:bb:c1:d9"
 		#self.req.a = a
 		#self.req.b = b
+		return self.cli.call_async(self.req)
+
+
+class AcceptTaskClient(Node):
+	def __init__(self, node_name, server_interface_type, topic_name):
+		super().__init__(node_name)
+		#self.cli = self.create_client(GetMapData, 'get_map_data')
+		self.cli = self.create_client(server_interface_type, topic_name)
+		while not self.cli.wait_for_service(timeout_sec=1.0):
+			self.get_logger().info('service accept task not available, waiting again...')
+		self.req = server_interface_type.Request()
+
+	def send_request(self, task_id, robot_name):
+		self.req.task_id = task_id
+		self.req.robot_name = robot_name
 		return self.cli.call_async(self.req)
 
 
@@ -245,8 +276,11 @@ def main(args=None):
 	print("Informações sobre o robô recebidas.")
 	print(request_response)
 	my_position = (request_response.x_position, request_response.y_position)
+	my_name = request_response.robot_name
 	draw_square(my_position[0], my_position[1], color_green)
 	control["my_position"] = my_position
+	control["my_name"] = my_name
+	
 
 	bulletin_thread = threading.Thread(target=check_updates, args=(control,))
 	bulletin_thread.start()

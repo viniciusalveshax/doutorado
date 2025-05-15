@@ -19,9 +19,14 @@ from PIL import Image
 import numpy as np
 
 #from map_interfaces.msg import GetMapInfo
-from map_interfaces.srv import GetMapData, GetMapDims, GetMapSerial, RememberRobotData #, SendMsgServer
+from map_interfaces.srv import GetMapData, GetMapDims, GetMapSerial, RememberRobotData, AcceptTask #, SendMsgServer
 
 color_white = (255, 255, 255)
+
+# ID da nova tarefa a ser criada
+task_id = 0
+# Lista de tarefas
+task_list = {}
 
 def empty_space(img_np, x, y):
 	print(img_np[x][y])
@@ -149,6 +154,36 @@ class RobotDataService(MinimalService):
 		return response
 
 
+class AcceptTaskService(MinimalService):
+	def callback_method(self, request, response):
+		global task_list
+		self.get_logger().info('Recebendo confirmação de aceitação de tarefa')
+
+		robot_name = request.robot_name
+		task_id = request.task_id
+
+		print('O robô ', robot_name, ' quer aceitar a tarefa ', task_id)
+		
+		# Testa se a tarefa está disponível
+		if task_list[task_id]["available"] == True:
+			# Caso sim confirma ao robô que ele pode começar,
+			# marca a tarefa como indisponível e 
+			# armazena o robô responsável pela tarefa
+			response.response = True
+			task_list[task_id]["available"] = False
+			task_list[task_id]["robot_name"] = robot_name
+			print(task_list[task_id])
+		else:
+			# Caso não informa ao robô que a tarefa não está mais disponível
+			response.response = False
+			print("Respondendo ao robô ", robot_name, " que a tarefa ", task_id, " não está mais disponível")
+		
+		print("Enviando a informação sobre confirmação da tarefa")
+
+		#TODO Informar que a tarefa não está mais disponível
+
+		return response
+
 
 
 def start_ros_nodes():
@@ -183,6 +218,9 @@ def start_ros_nodes():
 		
 		provide_robot_data = RobotDataService('node_get_robot_data', RememberRobotData, 'get_robot_data')
 		executor.add_node(provide_robot_data)
+
+		provide_accept_task_service = AcceptTaskService('node_accept_task', AcceptTask, 'accept_task')
+		executor.add_node(provide_accept_task_service)
 
 
 #		receive_msg_service = ReceiveMsgService('node_receive_msg', SendMsgServer, 'send_msg_server')
@@ -224,10 +262,18 @@ def publish_bulletin(publisher, content = ''):
 	print("Publiquei: ", msg)
 
 def goto(x, y):
-	global bulletin_publisher
+	global bulletin_publisher, task_id
 
-	content = "Solicitando robô em X=" + x + " e Y=" + y
+	# Adiciona a tarefa na lista de tarefas
+	task_list[task_id] = {'destiny': (x, y), 'available': True}
+	print("Nova tarefa ", task_list[task_id])
+
+	# Publica a tarefa nova
+	content = "Tarefa " + str(task_id) + " : Solicitando robô em X=" + x + " e Y=" + y
 	publish_bulletin(bulletin_publisher, content)
+	
+	task_id = task_id + 1
+	
 
 def read_keyboard(publisher):
 	global bulletin_publisher
