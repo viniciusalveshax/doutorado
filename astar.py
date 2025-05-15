@@ -3,7 +3,7 @@ import numpy
 
 class AStar:
 
-	def __init__(self, map, start, end=(), marker='', type="position", debug=False):
+	def __init__(self, map, start, end=(), walls=['.', '=', '|'], marker='', type="position", debug=False):
 
 		self.debug_option = debug
 
@@ -31,6 +31,7 @@ class AStar:
 		self.end = end
 		self.map_with_path = {}
 		self.path = []
+		self.walls = walls
 
 	def mapfile_to_list(self, mapfile):
 		tmp_list = []
@@ -85,14 +86,21 @@ class AStar:
 		distance = abs(dif_x) + abs(dif_y)
 		return distance
 
+	def test_wall(self, x, y):
+		for wall_type in self.walls:
+			# Se achou algum tipo de parede retorna verdadeiro
+			if numpy.array_equal(self.map[x][y], wall_type):
+				return True
+		# Se não encontrou uma correspondência com as paredes retorna falso
+		return False
+
 	def test_neighbor(self, x, y):
-		# Verifica se os vizinhos estão fora do labirinto
-		# e/ou são paredes
+		# Verifica se os vizinhos estão dentro do labirinto
+		# e/ou não são paredes
 		if 0 <= x < len(self.map):
 			if 0 <= y < len(self.map[x]):
-				# . são as paredes internas
-				# = e | são as paredes externas
-				if self.map[x][y] != '.' and self.map[x][y] != '=' and self.map[x][y] != '|':
+				# Testa se bateu em uma parede
+				if self.test_wall(x,y) == False:
 					return True
 
 	def get_neighbors(self, node):

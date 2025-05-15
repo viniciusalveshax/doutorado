@@ -20,6 +20,7 @@ from std_msgs.msg import String
 from astar import AStar
 
 color_black = (0, 0, 0)
+color_green = (0, 255, 0)
 color_red = (255, 0, 0)
 
 # Tamanho padrão do "robô"
@@ -159,7 +160,7 @@ def robot_step():
 			my_position = control["my_position"]
 			print("Minha posição:", my_position, " meu destino ", (x_destiny,y_destiny))
 			# Planeja o caminho
-			maze = AStar(map=array2d, start=my_position, end=(x_destiny, y_destiny), debug=True)
+			maze = AStar(map=array2d, start=my_position, end=(x_destiny, y_destiny), walls=[color_black], debug=False)
 			if maze.solve() == True:
 				print("Foi possível resolver")
 				#maze_path.print_map_with_solution()
@@ -226,7 +227,7 @@ def main(args=None):
 	print("Informações sobre o robô recebidas.")
 	print(request_response)
 	my_position = (request_response.x_position, request_response.y_position)
-	draw_square(my_position[0], my_position[1], color_black)
+	draw_square(my_position[0], my_position[1], color_green)
 	control["my_position"] = my_position
 
 	bulletin_thread = threading.Thread(target=check_updates, args=(control,))
