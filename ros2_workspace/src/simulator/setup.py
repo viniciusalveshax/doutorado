@@ -22,6 +22,7 @@ setup(
         'console_scripts': [
             'task_master = simulator.task_master:main',
             'robot = simulator.robot:main',
+            'world = simulator.world:main',
         ],
     },
 )
