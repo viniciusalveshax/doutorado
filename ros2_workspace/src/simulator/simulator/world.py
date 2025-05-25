@@ -14,6 +14,36 @@ import numpy as np
 #Para leitura paralela do teclado
 import threading
 
+import rclpy
+from rclpy.node import Node
+from rclpy.executors import MultiThreadedExecutor
+
+from std_msgs.msg import String
+
+from map_interfaces.srv import InformPosition
+
+class MinimalService(Node):
+	def __init__(self, node_name, server_interface_type, topic_name):
+		super().__init__(node_name)
+		#        self.srv = self.create_service(GetMapData, 'get_map_data', self.get_map_data_callback)
+		self.srv = self.create_service(server_interface_type, topic_name, self.callback_method)
+		
+
+class InformPositionService(MinimalService):
+	def callback_method(self, request, response):
+		self.get_logger().info('Robô informando posição')
+
+		robot_name = request.robot_name
+		x_position = request.x_position
+		y_position = request.y_position
+
+		print('O robô com nome ', robot_name, ' está informando a sua posição: x ', x_position, ' y ', y_position)
+
+		response.response = True
+
+		return response
+
+
 # #Determine if the neighboors are visible from a arbitrary point
 # def visible(tmp, x, y, scale):
 # 	global img_np
@@ -522,6 +552,32 @@ img_np = np.empty((2, 2))
 
 screen = pygame.display.set_mode((max_screen_size, max_screen_size))
 
+def start_ros_services():
+
+	rclpy.init()
+
+	try:
+
+		executor = MultiThreadedExecutor()
+
+		inform_position_service = InformPositionService('node_inform_position', InformPosition, 'inform_position')
+		executor.add_node(inform_position_service)
+
+		try:
+			executor.spin()
+		except (KeyboardInterrupt, rclpy.executors.ExternalShutdownException):
+			executor.shutdown()
+		finally:
+			executor.shutdown()
+			inform_position_service.destroy_node()
+
+	finally:
+		# Destroi o nodo publicador
+		print("Encerrando a execução do ROS")
+		rclpy.shutdown()
+
+
+
 
 def main(args=None):
 	global running, img_np
@@ -533,6 +589,7 @@ def main(args=None):
 
 	# pygame setup
 	pygame.init()
+	pygame.display.set_caption('World')
 	
 	print(type(screen))
 	
@@ -561,62 +618,10 @@ def main(args=None):
 	#Inicia a thread de leitura do teclado - Faz isso separadamente para não atrapalhar o gameloop
 	keyboard_thread = threading.Thread(target=read_keyboard)
 	keyboard_thread.start()
-
-	# #Inicialmente o programa não está pausado
-	# paused = False
-
-	# #Indica que inicialmente a localização do destino é inválida (não desenhar sobre a posição antiga)
-	# previous_x_destination = -1
-	# previous_y_destination = -1
-
-
-
-	# # Define um conjunto com as 6 salas. Cada sala é indicada por uma cor
-	# # vermelho, verde, azul, ciano, amarelo e magenta
-	# #rooms = {(0, 0, 255), (0, 255, 0), (255, 0, 0), (255, 255, 0), (255, 0, 255), (0, 255, 255)}
-	# #rooms_paths = {}
-	# #for room in rooms:
-	# #	tmp_set = rooms - {room}
-	# #	for tmp_room in tmp_set:
-	# #		print("Room ", room, ", tmp_room ", tmp_room)
-	# #		if room in rooms_paths and tmp_room in rooms_paths[room]:
-	# #			print("Já foi calculado")
-	# #		else:
-	# #			if not room in rooms_paths:
-	# #				rooms_paths[room] = {}
-	# #			if not tmp_room in rooms_paths[room]:
-	# #				rooms_paths[room][tmp_room] = "aaa"
-	# #				if not tmp_room in rooms_paths:
-	# #					rooms_paths[tmp_room] = {}
-	# #				rooms_paths[tmp_room][room] = "-a"
-				
-	# #for tmp_room_path in rooms_paths:
-	# #	print("Chave ", tmp_room_path, ", valor ", rooms_paths[tmp_room_path])
-
-
-
-	# # Quanto deve ser a escala da amostragem do mapa para acelerar o A*?
-	# # Ex: Amostragem de 1:10 então scale=10
-	# scale = 20
-	# minimap = generate_minimap(img_np, scale)
-	# if debug_level == 2:
-	# 	print("Minimap array: ")
-	# 	print(minimap)
-	# surf = pygame.surfarray.make_surface(minimap)
-	# screen.blit(surf, (0, 0))
-
-	# x_minimap = int(x/scale)
-	# y_minimap = int(y/scale)
-	# print(minimap[x_minimap][y_minimap])
-
-	# print("x minimap ", x_minimap, " , y_minimap ", y_minimap)
-
-
-
-	# #print(img_np.shape, minimap.shape)
-	# #print(img_np[0][0], minimap[0][0])
-	# data = Image.fromarray(minimap.astype(np.uint8)) 
-	# data.save('minimap.bmp') 
+	
+	ros_services_thread = threading.Thread(target=start_ros_services)
+	ros_services_thread.start()
+	
 
 	while running:
 		# poll for events
@@ -625,10 +630,6 @@ def main(args=None):
 			if event.type == pygame.QUIT:
 			    running = False
 
-	# 	# fill the screen with a color to wipe away anything from last frame
-	# #	screen.fill("green")
-
-	# 	#position = pygame.Vector2(x, y)
 
 		update_dyn_objects()
 		
@@ -643,8 +644,6 @@ def main(args=None):
 
 	# Encerra a thread de leitura do teclado
 	keyboard_thread.join()
-
-	# #print(img_np)
 
 	# Encerra o programa
 	pygame.quit()

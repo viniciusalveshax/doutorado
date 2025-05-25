@@ -13,7 +13,7 @@ import time
 import rclpy
 from rclpy.node import Node
 
-from map_interfaces.srv import GetMapDims, GetMapSerial, RememberRobotData, AcceptTask #, SendMsgServer
+from map_interfaces.srv import GetMapDims, GetMapSerial, RememberRobotData, AcceptTask, InformPosition
 from std_msgs.msg import String
 
 # Algoritmo do A*
@@ -124,6 +124,22 @@ class AcceptTaskClient(Node):
 		return self.cli.call_async(self.req)
 
 
+class InformPositionClient(Node):
+	def __init__(self, node_name, server_interface_type, topic_name):
+		super().__init__(node_name)
+		#self.cli = self.create_client(GetMapData, 'get_map_data')
+		self.cli = self.create_client(server_interface_type, topic_name)
+		while not self.cli.wait_for_service(timeout_sec=1.0):
+			self.get_logger().info('service accept task not available, waiting again...')
+		self.req = server_interface_type.Request()
+
+	def send_request(self, robot_name, position):
+		self.req.x_position = position[0]
+		self.req.y_position = position[1]		
+		self.req.robot_name = robot_name
+		return self.cli.call_async(self.req)
+
+
 def draw_square(x, y, color):
 	global array2d
 	
@@ -177,6 +193,9 @@ def walk_one_step():
 	my_position = control["my_position"]
 	draw_square(my_position[0], my_position[1], color_white)
 	draw_square(next_position[0], next_position[1], color_green)
+	
+	
+	
 	# Remove a posição do labirinto
 	if len(maze_path) > 0:
 		control["maze_path"] = maze_path[1:]
@@ -233,6 +252,9 @@ def main(args=None):
 
 	# pygame setup
 	pygame.init()
+	
+	pygame.display.set_caption('Robô')
+	
 	screen = pygame.display.set_mode((720, 720))
 	clock = pygame.time.Clock()
 	running = True
@@ -280,6 +302,14 @@ def main(args=None):
 	draw_square(my_position[0], my_position[1], color_green)
 	control["my_position"] = my_position
 	control["my_name"] = my_name
+	
+	
+	print("Informando ao mundo a minha posição")
+	inform_position_client = InformPositionClient('node_robot_inform_position', InformPosition, 'inform_position')
+	future_request = inform_position_client.send_request(my_name, my_position)
+	rclpy.spin_until_future_complete(inform_position_client, future_request)
+	print("Informei a posição.")
+	request_response = future_request.result()
 	
 
 	bulletin_thread = threading.Thread(target=check_updates, args=(control,))

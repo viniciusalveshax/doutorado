@@ -1,0 +1,5 @@
+string robot_name
+uint16 x_position
+uint16 y_position
+---
+bool response
