@@ -42,10 +42,12 @@ class InformPositionService(MinimalService):
 		# Verificar se a chave 'idade' existe
 		if robot_name in robot_objects:
 			print('O robô com nome ', robot_name, ' está atualizando a sua posição: x ', x_position, ' y ', y_position)
+			robot_objects[robot_name]["old_position"] = robot_objects[robot_name]["my_position"]
+			robot_objects[robot_name]["my_position"] = (x_position, y_position)
+
 		else:
 			print('O robô com nome ', robot_name, ' está informando a sua posição pela 1ª vez: x ', x_position, ' y ', y_position)
-
-		robot_objects[robot_name] = (x_position, y_position)
+			robot_objects[robot_name] = {"my_position": (x_position, y_position)}
 
 		response.response = True
 
@@ -338,22 +340,26 @@ def update_objects():
 		dyn_object.step()
 
 	#print(robot_objects)	
-	for robot_name, robot_position in robot_objects.items():
-		update_robot(robot_position)	
+	for robot_name, robot_positions in robot_objects.items():
+		update_robot(robot_positions)	
 
 		
-def update_robot(robot_position):
+def update_robot(robot_positions):
 
 	#TODO Testa se já existia um robô com esse nome, caso sim apaga o desenho da posição antiga
 
-	print("Vou desenhar um robô em ", robot_position)
+	print("Vou desenhar um robô em ", robot_positions)
+
+	if "old_position" in robot_positions:
+		(old_x, old_y) = robot_positions["old_position"]
+		draw_square(old_x, old_y, color_white)		
 
 	#Atualiza posição
 	#robot_objects[robot_name] = (x,y)
-	(tmp_x, tmp_y) = robot_position
+	(new_x, new_y) = robot_positions["my_position"]
 	
 	#Desenha robô na posição nova
-	draw_square(tmp_x, tmp_y, color_green)
+	draw_square(new_x, new_y, color_green)
 		
 	#print("Posição do robô ", robot_name, " é X:", x, " e Y:", y) 
 
@@ -584,7 +590,7 @@ dt = 0
 size = 30
 
 # Tamanho da tela
-max_screen_size = 500
+max_screen_size = 720
 
 img_np = np.empty((2, 2))
 
