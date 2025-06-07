@@ -31,13 +31,21 @@ class MinimalService(Node):
 
 class InformPositionService(MinimalService):
 	def callback_method(self, request, response):
+		global robot_objects
+
 		self.get_logger().info('Robô informando posição')
 
 		robot_name = request.robot_name
 		x_position = request.x_position
 		y_position = request.y_position
 
-		print('O robô com nome ', robot_name, ' está informando a sua posição: x ', x_position, ' y ', y_position)
+		# Verificar se a chave 'idade' existe
+		if robot_name in robot_objects:
+			print('O robô com nome ', robot_name, ' está atualizando a sua posição: x ', x_position, ' y ', y_position)
+		else:
+			print('O robô com nome ', robot_name, ' está informando a sua posição pela 1ª vez: x ', x_position, ' y ', y_position)
+
+		robot_objects[robot_name] = (x_position, y_position)
 
 		response.response = True
 
@@ -259,6 +267,7 @@ def check_colision(x, y, movement_sense):
 		print(img_np[x][y], img_np[x_left][y_left], img_np[x_right][y_right])
 		#print(color_white)
 		return True
+		
 
 class DynamicObject:
 	def __init__(self, position, direction):
@@ -319,14 +328,34 @@ class DynamicObject:
 
 
 
-def update_dyn_objects():
-	global dynamic_objects
+def update_objects():
+	global dynamic_objects, robot_objects
 	#len_dynamic_objets = len(dynamic_objects)
 	#if len_dynamic_objets > 0:
 		#print(dynamic_objects)
 		#print("Qtdade objetos dinâmicos ", len_dynamic_objets)
 	for dyn_object in dynamic_objects:
 		dyn_object.step()
+
+	#print(robot_objects)	
+	for robot_name, robot_position in robot_objects.items():
+		update_robot(robot_position)	
+
+		
+def update_robot(robot_position):
+
+	#TODO Testa se já existia um robô com esse nome, caso sim apaga o desenho da posição antiga
+
+	print("Vou desenhar um robô em ", robot_position)
+
+	#Atualiza posição
+	#robot_objects[robot_name] = (x,y)
+	(tmp_x, tmp_y) = robot_position
+	
+	#Desenha robô na posição nova
+	draw_square(tmp_x, tmp_y, color_green)
+		
+	#print("Posição do robô ", robot_name, " é X:", x, " e Y:", y) 
 
 def add_dynamic_object(position, direction):
 	if direction == 'h':
@@ -348,6 +377,8 @@ def add_dynamic_object(position, direction):
 
 def add_static_object(position):
 	x, y = position[0], position[1]
+	
+	static_objects.append((x,y))
 	print("Adicionando objeto estático em: X " + str(x) + " Y " + str(y))
 	draw_square(x, y, color_black)
 
@@ -530,12 +561,19 @@ def draw_square(x, y, color):
 # Cria uma lista, inicialmente vazia, de objetos que se movem
 dynamic_objects = []
 
+static_objects = []
+
+robot_objects = {}
+
 # Configura algumas cores comuns
 color_red = (255, 0, 0)
 
 # Fundo
 color_white = (255, 255, 255)
 color_cyan = (0, 255, 255)
+
+# Robôs
+color_green = (0, 255, 0)
 
 # Obstáculos móveis
 color_black = (0, 0, 0)
@@ -631,7 +669,7 @@ def main(args=None):
 			    running = False
 
 
-		update_dyn_objects()
+		update_objects()
 		
 	 	# flip() the display to put your work on screen
 		pygame.display.flip()

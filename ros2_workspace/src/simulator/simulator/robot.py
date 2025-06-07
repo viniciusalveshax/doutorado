@@ -1,6 +1,8 @@
 # Para mostrar a representação atual do mapa
 import pygame
 
+import random
+
 import numpy as np
 
 # Para monitorar o tópico com novidades vindo do master
@@ -12,6 +14,7 @@ import time
 # Bibliotecas do ROS2
 import rclpy
 from rclpy.node import Node
+from rclpy.executors import MultiThreadedExecutor
 
 from map_interfaces.srv import GetMapDims, GetMapSerial, RememberRobotData, AcceptTask, InformPosition
 from std_msgs.msg import String
@@ -166,6 +169,8 @@ def draw_square(x, y, color):
 	array2d[x0:delta_x, y0:delta_y] = color
 	
 def check_updates(control):
+
+	rclpy.init()
 	
 	subscriber = MinimalSubscriber()
 
@@ -186,15 +191,52 @@ def draw_path(path_list):
 	surf = pygame.surfarray.make_surface(array2d)
 	screen.blit(surf, (0, 0))
 
+def inform_position(control):
+	numero = random.randint(1, 100)  # número aleatório entre 1 e 100
+	node_name = "node_robot_inform_position" + str(numero)
+	inform_position_client = InformPositionClient(node_name, InformPosition, 'inform_position')
+
+	my_name = control["my_name"]
+	my_position = control["my_position"]
+	future_request = inform_position_client.send_request(my_name, my_position)
+	rclpy.spin_until_future_complete(inform_position_client, future_request)
+	print("Informei a posição.")
+	request_response = future_request.result()
+	inform_position_client.destroy_node()
+
+
 def walk_one_step():
 	maze_path = control["maze_path"]
+	my_name = control["my_name"]
+	my_position = control["my_position"]
+
 	next_position = maze_path[0]
 	print("Desenhando na próxima posição", next_position)
-	my_position = control["my_position"]
+
 	draw_square(my_position[0], my_position[1], color_white)
 	draw_square(next_position[0], next_position[1], color_green)
-	
-	
+
+	# Informa ao mundo a posição
+	print("Informando ao mundo a minha posição")
+	inform_position_client = control["position_client"]
+
+	inform_position_thread = threading.Thread(target=inform_position, args=(control,))
+	inform_position_thread.start()
+	inform_position_thread.join()
+
+	#rclpy = control["rclpy"]
+
+	# Recria nó
+#	inform_position_client.destroy_node('node_robot_inform_position')
+
+	# Inialização do ROS
+	#rclpy.init(args=args)
+
+	# Destroy the node explicitly
+	# (optional - otherwise it will be done automatically
+	# when the garbage collector destroys the node object)
+	#subscriber.destroy_node()
+	#rclpy.shutdown()
 	
 	# Remove a posição do labirinto
 	if len(maze_path) > 0:
@@ -207,6 +249,8 @@ def walk_one_step():
 # Ciclo de simulação do robô
 def robot_step():
 	global control, screen
+
+	#rclpy.init()
 
 	if control["available"] == True:
 		print("Nada pra fazer ...")
@@ -225,7 +269,7 @@ def robot_step():
 			my_position = control["my_position"]
 			print("Minha posição:", my_position, " meu destino ", (x_destiny,y_destiny))
 			# Planeja o caminho
-			maze = AStar(map=array2d, start=my_position, end=(x_destiny, y_destiny), walls=[color_black], debug=False)
+			maze = AStar(map=array2d, start=my_position, end=(x_destiny, y_destiny), walls=[color_black], debug=True)
 			if maze.solve() == True:
 				print("Foi possível resolver")
 				#maze_path.print_map_with_solution()
@@ -302,7 +346,7 @@ def main(args=None):
 	draw_square(my_position[0], my_position[1], color_green)
 	control["my_position"] = my_position
 	control["my_name"] = my_name
-	
+	#control["rclpy"] = rclpy	
 	
 	print("Informando ao mundo a minha posição")
 	inform_position_client = InformPositionClient('node_robot_inform_position', InformPosition, 'inform_position')
@@ -310,7 +354,10 @@ def main(args=None):
 	rclpy.spin_until_future_complete(inform_position_client, future_request)
 	print("Informei a posição.")
 	request_response = future_request.result()
+	control["position_client"] = inform_position_client
+	inform_position_client.destroy_node()
 	
+	rclpy.shutdown()
 
 	bulletin_thread = threading.Thread(target=check_updates, args=(control,))
 	bulletin_thread.start()
