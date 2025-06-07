@@ -1,9 +1,9 @@
 
-import rclpy
-from rclpy.node import Node
-from rclpy.executors import MultiThreadedExecutor
+import rclpy # type: ignore
+from rclpy.node import Node # type: ignore
+from rclpy.executors import MultiThreadedExecutor # type: ignore
 
-from std_msgs.msg import String
+from std_msgs.msg import String # type: ignore
 
 # Para gerar o timestamp
 import time
@@ -19,7 +19,7 @@ from PIL import Image
 import numpy as np
 
 #from map_interfaces.msg import GetMapInfo
-from map_interfaces.srv import GetMapData, GetMapDims, GetMapSerial, RememberRobotData, AcceptTask #, SendMsgServer
+from map_interfaces.srv import GetMapData, GetMapDims, GetMapSerial, RememberRobotData, AcceptTask # type: ignore #, SendMsgServer
 
 color_white = (255, 255, 255)
 
@@ -238,7 +238,10 @@ def start_ros_nodes():
 			#node_publisher.destroy_node()
 #			receive_msg_service.destroy_node()
 			node.destroy_node()
-			get_map_serial.destroy_node()
+			provide_map_dims_service.destroy_node()
+			provide_map_serial.destroy_node()
+			provide_robot_data.destroy_node()
+			provide_accept_task_service.destroy_node()
 
 	finally:
 		# Destroi o nodo publicador
