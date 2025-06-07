@@ -216,6 +216,8 @@ def walk_one_step():
 	draw_square(my_position[0], my_position[1], color_white)
 	draw_square(next_position[0], next_position[1], color_green)
 
+	control["my_position"] = next_position
+
 	# Informa ao mundo a posição
 	print("Informando ao mundo a minha posição")
 	inform_position_client = control["position_client"]
