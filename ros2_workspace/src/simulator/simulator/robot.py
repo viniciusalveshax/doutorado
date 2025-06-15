@@ -8,24 +8,37 @@ import numpy as np
 # Para monitorar o tópico com novidades vindo do master
 import threading
 
+# Para conectar no servidor sem passar pelo ROS
+import socket
+
 # Para desacelerar o tempo de simulação
 import time
 
 # Bibliotecas do ROS2
-import rclpy
-from rclpy.node import Node
-from rclpy.executors import MultiThreadedExecutor
+import rclpy # type: ignore
+from rclpy.node import Node # type: ignore
+from rclpy.executors import MultiThreadedExecutor # type: ignore
 
-from map_interfaces.srv import GetMapDims, GetMapSerial, RememberRobotData, AcceptTask, InformPosition
-from std_msgs.msg import String
+from map_interfaces.srv import GetMapDims, GetMapSerial, RememberRobotData, AcceptTask, InformPosition, CheckObstacles # type: ignore
+from std_msgs.msg import String # type: ignore
 
 # Algoritmo do A*
-from astar import AStar
+from astar import AStar # type: ignore
 
+#Fundo - Branco
 color_white = (255, 255, 255)
+
+#Paredes - Preto
 color_black = (0, 0, 0)
+
+#Robô - Verde
 color_green = (0, 255, 0)
+
+#Destino - Vermelho
 color_red = (255, 0, 0)
+
+#Obstáculo - Azul
+obstacle_color = (0, 0, 255)
 
 # Tamanho padrão do "robô"
 size = 30
@@ -37,6 +50,11 @@ control = {}
 my_position = (0,0)
 MAX_X = 720
 MAX_Y = 720
+
+DEBUG = False
+
+SERVER='127.0.0.1'
+PORT=6666
 
 class MinimalSubscriber(Node):
 	def __init__(self):
@@ -133,7 +151,7 @@ class InformPositionClient(Node):
 		#self.cli = self.create_client(GetMapData, 'get_map_data')
 		self.cli = self.create_client(server_interface_type, topic_name)
 		while not self.cli.wait_for_service(timeout_sec=1.0):
-			self.get_logger().info('service accept task not available, waiting again...')
+			self.get_logger().info('service inform position not available, waiting again...')
 		self.req = server_interface_type.Request()
 
 	def send_request(self, robot_name, position):
@@ -141,6 +159,22 @@ class InformPositionClient(Node):
 		self.req.y_position = position[1]		
 		self.req.robot_name = robot_name
 		return self.cli.call_async(self.req)
+
+class CheckObstaclesClient(Node):
+	def __init__(self, node_name, server_interface_type, topic_name):
+		super().__init__(node_name)
+		#self.cli = self.create_client(GetMapData, 'get_map_data')
+		self.cli = self.create_client(server_interface_type, topic_name)
+		while not self.cli.wait_for_service(timeout_sec=1.0):
+			self.get_logger().info('service check obstacles not available, waiting again...')
+		self.req = server_interface_type.Request()
+
+	def send_request(self, robot_name, new_position):
+		self.req.x_position = new_position[0]
+		self.req.y_position = new_position[1]		
+		self.req.robot_name = robot_name
+		return self.cli.call_async(self.req)
+
 
 
 def draw_square(x, y, color):
@@ -191,19 +225,91 @@ def draw_path(path_list):
 	surf = pygame.surfarray.make_surface(array2d)
 	screen.blit(surf, (0, 0))
 
+def check_for_obstacles(control):
+
+	numero = random.randint(1, 100)  # número aleatório entre 1 e 100
+	node_name = "check_obstacles_client" + str(numero)
+
+	#exec = rclpy.get_global_executor()
+	#nodes = exec.get_nodes()
+	#print(nodes)
+
+	#check_for_obstacles_client = CheckObstaclesClient(node_name, CheckObstacles, 'check_obstacles')
+
+	#exec.add_node(check_for_obstacles_client)
+
+	my_name = control["my_name"]
+	next_position = control["next_position"]
+	print("\nVerificando obstáculos em ", next_position)
+	
+	# Definir o endereço e a porta do servidor
+	server_conf = (SERVER, PORT)  # 127.0.0.1 é o loopback (localhost)
+
+	# Criar um socket UDP
+	client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+	message = my_name + ' ' + str(next_position[0]) + ' ' + str(next_position[1])
+	coded_message = message.encode('utf-8')
+
+	# Enviar a mensagem
+	client_socket.sendto(coded_message, server_conf)
+
+	# Receber uma resposta (opcional)
+	data, _ = client_socket.recvfrom(1024)
+	response = data.decode('utf-8')
+	print(f"Resposta do servidor: {response}")
+
+	#future_request = check_for_obstacles_client.send_request(my_name, next_position)
+	#rclpy.spin_until_future_complete(check_for_obstacles_client, future_request)
+	#request_response = future_request.result()
+	
+	response = int(response)
+
+	# Verifica a resposta
+	if response == 1:
+		print("Encontrou um obstáculo em ", next_position)
+	else:
+		print("Sem obstáculos em ", next_position)
+
+	control["obstacles_found"] = response
+
+	#check_for_obstacles_client.destroy_node()
+
+
+
 def inform_position(control):
 	numero = random.randint(1, 100)  # número aleatório entre 1 e 100
 	node_name = "node_robot_inform_position" + str(numero)
-	inform_position_client = InformPositionClient(node_name, InformPosition, 'inform_position')
+	#inform_position_client = InformPositionClient(node_name, InformPosition, 'inform_position')
 
 	my_name = control["my_name"]
 	my_position = control["my_position"]
-	future_request = inform_position_client.send_request(my_name, my_position)
-	rclpy.spin_until_future_complete(inform_position_client, future_request)
-	print("Informei a posição.")
-	request_response = future_request.result()
-	inform_position_client.destroy_node()
+	
+	# Definir o endereço e a porta do servidor
+	server_conf = (SERVER, PORT+1)  # 127.0.0.1 é o loopback (localhost)
 
+	# Criar um socket UDP
+	client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+	message = my_name + ' ' + str(my_position[0]) + ' ' + str(my_position[1])
+	coded_message = message.encode('utf-8')
+
+	# Enviar a mensagem
+	client_socket.sendto(coded_message, server_conf)
+
+	# Receber uma resposta (opcional)
+	data, _ = client_socket.recvfrom(1024)
+	response = data.decode('utf-8')
+	print(f"Resposta do servidor: {response}")
+
+def mark_obstacle(position):
+	(tmp_x, tmp_y) = position
+
+	print("Marcando obstáculo no mapa")
+
+	array2d = control["map"]
+	array2d[tmp_x-3:tmp_x+3, tmp_y-3:tmp_y+3] = obstacle_color
+	control["map"] = array2d
 
 def walk_one_step():
 	maze_path = control["maze_path"]
@@ -211,41 +317,53 @@ def walk_one_step():
 	my_position = control["my_position"]
 
 	next_position = maze_path[0]
-	print("Desenhando na próxima posição", next_position)
-
-	draw_square(my_position[0], my_position[1], color_white)
-	draw_square(next_position[0], next_position[1], color_green)
-
-	control["my_position"] = next_position
-
-	# Informa ao mundo a posição
-	print("Informando ao mundo a minha posição")
-	inform_position_client = control["position_client"]
-
-	inform_position_thread = threading.Thread(target=inform_position, args=(control,))
-	inform_position_thread.start()
-	inform_position_thread.join()
-
-	#rclpy = control["rclpy"]
-
-	# Recria nó
-#	inform_position_client.destroy_node('node_robot_inform_position')
-
-	# Inialização do ROS
-	#rclpy.init(args=args)
-
-	# Destroy the node explicitly
-	# (optional - otherwise it will be done automatically
-	# when the garbage collector destroys the node object)
-	#subscriber.destroy_node()
-	#rclpy.shutdown()
 	
-	# Remove a posição do labirinto
-	if len(maze_path) > 0:
-		control["maze_path"] = maze_path[1:]
+	if DEBUG:
+		print("Desenhando na próxima posição", next_position)
+
+	control["next_position"] = next_position
+	control["obstacles_found"] = False
+	
+	check_obstacles_thread = threading.Thread(target=check_for_obstacles, args=(control,))
+	check_obstacles_thread.start()
+	check_obstacles_thread.join()
+
+	#check_for_obstacles(control)
+	
+	#check_for_obstacles_thread = threading.Thread(target=check_for_obstacles, args=(control,))
+	#check_for_obstacles_thread.start()
+	#check_for_obstacles_thread.join()
+
+	#control["obstacles_found"] = True
+
+	# Testa se encontrou algum obstáculo
+	if not control["obstacles_found"]:
+		draw_square(my_position[0], my_position[1], color_white)
+		draw_square(next_position[0], next_position[1], color_green)
+
+		control["my_position"] = next_position
+
+		# Informa ao mundo a posição
+
+		if DEBUG:
+			print("Informando ao mundo a minha posição")
+		
+		inform_position_thread = threading.Thread(target=inform_position, args=(control,))
+		inform_position_thread.start()
+		inform_position_thread.join()
+		
+		# Remove a posição do labirinto
+		if len(maze_path) > 0:
+			control["maze_path"] = maze_path[1:]
+		else:
+			control["available"] = True
+			print("Cheguei no objetivo. Disponível para outra tarefa.")	
+
 	else:
-		control["available"] = True
-		print("Cheguei no objetivo. Disponível para outra tarefa.")	
+
+		mark_obstacle(next_position)
+		control["first_step"] = True
+
 	pygame.time.wait(50)
 
 # Ciclo de simulação do robô
@@ -255,10 +373,12 @@ def robot_step():
 	#rclpy.init()
 
 	if control["available"] == True:
-		print("Nada pra fazer ...")
+		if DEBUG:
+			print("Nada pra fazer ...")
 	else:
-		print("Tenho algo para fazer. Vou para:")
-		print(control["destiny"])
+		if DEBUG:
+			print("Tenho algo para fazer. Vou para:")
+			print(control["destiny"])
 
 		# Se a ordem é nova
 		if control["first_step"] == True:
@@ -269,15 +389,16 @@ def robot_step():
 			surf = pygame.surfarray.make_surface(array2d)
 			screen.blit(surf, (0, 0))
 			my_position = control["my_position"]
-			print("Minha posição:", my_position, " meu destino ", (x_destiny,y_destiny))
+			print("Novo plano. Minha posição:", my_position, " meu destino ", (x_destiny,y_destiny))
 			# Planeja o caminho
-			maze = AStar(map=array2d, start=my_position, end=(x_destiny, y_destiny), walls=[color_black], debug=True)
+			maze = AStar(map=array2d, start=my_position, end=(x_destiny, y_destiny), walls=[color_black], debug=DEBUG)
 			if maze.solve() == True:
-				print("Foi possível resolver")
 				#maze_path.print_map_with_solution()
 				maze_path = maze.get_path()
 				control["maze_path"] = maze_path
-				print(maze_path)
+				if DEBUG:
+					print("Foi possível resolver")
+					print(maze_path)
 				draw_path(maze_path)
 			else:
 				print("Não foi possível resolver")
@@ -287,7 +408,8 @@ def robot_step():
 			control["first_step"] = False
 		else:
 			# Executa o que foi planejado
-			print("Já planejei. Agora vou executar")
+			if DEBUG:
+				print("Já planejei. Agora vou executar")
 			walk_one_step()
 					
 	time.sleep(1)
@@ -335,6 +457,7 @@ def main(args=None):
 	
 	np_array = np.array(request_response.data)
 	array2d = np_array.reshape(map_dimensions)
+	control["map"] = array2d
 
 	print("Requisitando informações a respeito do robô (posição e nome)")
 	get_robot_data_client = ClientGetRobotData('node_get_robot_data', RememberRobotData, 'get_robot_data')
@@ -369,11 +492,10 @@ def main(args=None):
 		# pygame.QUIT event means the user clicked X to close your window
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
-			    running = False
+				running = False
 
 		# fill the screen with a color to wipe away anything from last frame
 	#	screen.fill("green")
-	
 		surf = pygame.surfarray.make_surface(array2d)
 		screen.blit(surf, (0, 0))
 

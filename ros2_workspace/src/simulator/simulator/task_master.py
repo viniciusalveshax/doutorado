@@ -140,7 +140,7 @@ class RobotDataService(MinimalService):
 
 		(x, y) = find_space_to_place_robot()
 		
-		available_names = ["Wall E", "Johnny V", "ED209"]
+		available_names = ["Wall_E", "Johnny_V", "ED209"]
 		#TODO Prevent name reutilization
 		choosed_name = random.choice(available_names)	
 
@@ -149,7 +149,7 @@ class RobotDataService(MinimalService):
 		response.robot_name = choosed_name
 	
 		
-		print("Enviando as informações do robô")
+		print("Enviando as informações do robô. Nome ", choosed_name, " x: ", x, " y: ", y)
 
 		return response
 
