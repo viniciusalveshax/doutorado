@@ -609,7 +609,10 @@ color_cyan = (0, 255, 255)
 # Robôs
 color_green = (0, 255, 0)
 
-# Obstáculos móveis
+# Área de segurança
+color_obstacle = (0, 0, 255)
+
+# Obstáculos fixos
 color_black = (0, 0, 0)
 
 dt = 0
@@ -715,11 +718,28 @@ def check_obstacles_service(running, img_np):
 		message = data.decode('utf-8')
 
 		print(message)
-		robot_name, robot_x, robot_y = message.split(' ')
+		robot_name, robot_x, robot_y, direction = message.split(' ')
+		
+		delta = int(size/2)
+
 		x_position = int(robot_x)
 		y_position = int(robot_y)
 
-		if np.array_equal(img_np[x_position][y_position], color_white) or np.array_equal(img_np[x_position][y_position], color_green):
+		print("Posição passada é x=", x_position, " y=", y_position, " direção é ", direction, end='')
+
+		delta = 0
+		if direction == 'up':
+			y_position = y_position - delta
+		elif direction == 'down':
+			y_position = y_position + delta
+		elif direction == 'left:':
+			x_position = x_position - delta
+		elif direction == 'right':
+			x_position = x_position + delta
+
+		print(". Testando em x ", x_position, " e y ", y_position, " é = ", img_np[x_position][y_position])
+
+		if np.array_equal(img_np[x_position][y_position], color_white) or np.array_equal(img_np[x_position][y_position], color_green) or  np.array_equal(img_np[x_position][y_position], color_obstacle):
 			response = str(0)
 		else:
 			response = str(1)
@@ -767,8 +787,8 @@ def main(args=None):
 	keyboard_thread = threading.Thread(target=read_keyboard)
 	keyboard_thread.start()
 	
-	#ros_services_thread = threading.Thread(target=start_ros_services)
-	#ros_services_thread.start()
+	ros_services_thread = threading.Thread(target=start_ros_services)
+	ros_services_thread.start()
 
 	check_obstacles_service_thread = threading.Thread(target=check_obstacles_service, args=(running, img_np))
 	check_obstacles_service_thread.start()

@@ -239,16 +239,46 @@ def check_for_obstacles(control):
 	#exec.add_node(check_for_obstacles_client)
 
 	my_name = control["my_name"]
+	my_position = control["my_position"]
 	next_position = control["next_position"]
 	print("\nVerificando obstáculos em ", next_position)
 	
+	# Testa se o movimento é horizontal ou vertical
+	# Se o x for igual então o movimento é vertical
+	# se o x for diferente então o movimento é horizontal
+	if my_position[0] == next_position[0]:
+		if next_position[1] > my_position[1]:
+			direction = 'down'
+		else:
+			direction = 'up'
+	else:
+		if next_position[0] > my_position[0]:
+			direction = 'right'
+		else:
+			direction = 'left'
+
 	# Definir o endereço e a porta do servidor
 	server_conf = (SERVER, PORT)  # 127.0.0.1 é o loopback (localhost)
 
 	# Criar um socket UDP
 	client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-	message = my_name + ' ' + str(next_position[0]) + ' ' + str(next_position[1])
+	delta = int(size/2)
+
+	(x_position, y_position) = next_position
+
+	if direction == 'up':
+		y_position = y_position - delta
+	elif direction == 'down':
+		y_position = y_position + delta
+	elif direction == 'left:':
+		x_position = x_position - delta
+	elif direction == 'right':
+		x_position = x_position + delta
+
+	test_position = (x_position, y_position)
+
+	message = my_name + ' ' + str(test_position[0]) + ' ' + str(test_position[1]) + ' ' + direction
 	coded_message = message.encode('utf-8')
 
 	# Enviar a mensagem
@@ -257,7 +287,7 @@ def check_for_obstacles(control):
 	# Receber uma resposta (opcional)
 	data, _ = client_socket.recvfrom(1024)
 	response = data.decode('utf-8')
-	print(f"Resposta do servidor: {response}")
+	print(f"Check: Resposta do servidor: {response}")
 
 	#future_request = check_for_obstacles_client.send_request(my_name, next_position)
 	#rclpy.spin_until_future_complete(check_for_obstacles_client, future_request)
@@ -267,11 +297,14 @@ def check_for_obstacles(control):
 
 	# Verifica a resposta
 	if response == 1:
-		print("Encontrou um obstáculo em ", next_position)
-	else:
-		print("Sem obstáculos em ", next_position)
+		print("Encontrou um obstáculo em ", test_position)
+		control["obstacles_found"] = True
+		mark_obstacle(test_position, direction)
 
-	control["obstacles_found"] = response
+	else:
+		print("Sem obstáculos em ", test_position)
+		control["obstacles_found"] = False
+
 
 	#check_for_obstacles_client.destroy_node()
 
@@ -300,21 +333,41 @@ def inform_position(control):
 	# Receber uma resposta (opcional)
 	data, _ = client_socket.recvfrom(1024)
 	response = data.decode('utf-8')
-	print(f"Resposta do servidor: {response}")
+	print(f"Inform position: Resposta do servidor: {response}")
 
-def mark_obstacle(position):
-	(tmp_x, tmp_y) = position
+def mark_obstacle(position, direction):
+	(x, y) = position
 
 	print("Marcando obstáculo no mapa")
 
 	array2d = control["map"]
-	array2d[tmp_x-3:tmp_x+3, tmp_y-3:tmp_y+3] = obstacle_color
+
+	array2d[x-delta_security_x:x+delta_security_x, y-delta_security_y:y+delta_security_y] = color_black
+
+	delta_obstacle_x = 3
+	delta_obstacle_y = 3
+
+	if direction == 'left' or direction == 'right':
+		delta_security_x = int(size/2)
+		delta_security_y = int(size/2) + delta_obstacle_y
+	else:
+		delta_security_x = int(size/2) + delta_obstacle_x
+		delta_security_y = int(size/2)
+
+	array2d[x-delta_obstacle_x:x+delta_obstacle_x, y-delta_obstacle_y:y+delta_obstacle_y] = obstacle_color
+
+	#for tmp_x in range(x-delta_x, x+delta_x):
+	#	for tmp_y in range(y-delta_y, y+delta_y):
+	#		array2d[tmp_x:tmp_3, tmp_y-3:tmp_y+3] = obstacle_color
+
 	control["map"] = array2d
 
 def walk_one_step():
 	maze_path = control["maze_path"]
 	my_name = control["my_name"]
 	my_position = control["my_position"]
+
+	print("Dentro de walk one step. Maze_path = ", maze_path)
 
 	next_position = maze_path[0]
 	
@@ -360,11 +413,9 @@ def walk_one_step():
 			print("Cheguei no objetivo. Disponível para outra tarefa.")	
 
 	else:
-
-		mark_obstacle(next_position)
 		control["first_step"] = True
 
-	pygame.time.wait(50)
+	pygame.time.wait(10)
 
 # Ciclo de simulação do robô
 def robot_step():
@@ -391,14 +442,14 @@ def robot_step():
 			my_position = control["my_position"]
 			print("Novo plano. Minha posição:", my_position, " meu destino ", (x_destiny,y_destiny))
 			# Planeja o caminho
-			maze = AStar(map=array2d, start=my_position, end=(x_destiny, y_destiny), walls=[color_black], debug=DEBUG)
+			maze = AStar(map=array2d, start=my_position, end=(x_destiny, y_destiny), walls=[color_black, obstacle_color], debug=DEBUG)
 			if maze.solve() == True:
 				#maze_path.print_map_with_solution()
 				maze_path = maze.get_path()
 				control["maze_path"] = maze_path
 				if DEBUG:
 					print("Foi possível resolver")
-					print(maze_path)
+				print(maze_path)
 				draw_path(maze_path)
 			else:
 				print("Não foi possível resolver")
@@ -466,7 +517,9 @@ def main(args=None):
 	request_response = future_request.result()	
 	print("Informações sobre o robô recebidas.")
 	print(request_response)
-	my_position = (request_response.x_position, request_response.y_position)
+	#my_position = (request_response.x_position, request_response.y_position)
+	
+	my_position = (20, 20)
 	my_name = request_response.robot_name
 	draw_square(my_position[0], my_position[1], color_green)
 	control["my_position"] = my_position
