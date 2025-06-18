@@ -759,7 +759,12 @@ def main(args=None):
 	# pygame setup
 	pygame.init()
 	pygame.display.set_caption('World')
-	
+
+	# https://www.flaticon.com/free-icon/globe_183595
+	icon = pygame.image.load('/home/vinicius/projetos/github/doutorado/world.png') 
+	pygame.display.set_icon(icon)
+
+
 	print(type(screen))
 	
 	clock = pygame.time.Clock()

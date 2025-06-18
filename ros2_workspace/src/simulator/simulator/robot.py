@@ -474,6 +474,10 @@ def main(args=None):
 	
 	pygame.display.set_caption('Robô')
 	
+	# https://www.flaticon.com/free-icon/robot_3570207
+	icon = pygame.image.load('/home/vinicius/projetos/github/doutorado/robot-icon.png') 
+	pygame.display.set_icon(icon)
+
 	screen = pygame.display.set_mode((720, 720))
 	clock = pygame.time.Clock()
 	running = True
