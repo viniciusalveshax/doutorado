@@ -241,7 +241,9 @@ def check_for_obstacles(control):
 	my_name = control["my_name"]
 	my_position = control["my_position"]
 	next_position = control["next_position"]
-	print("\nVerificando obstáculos em ", next_position)
+
+	if DEBUG:
+		print("\nVerificando obstáculos em ", next_position)
 	
 	# Testa se o movimento é horizontal ou vertical
 	# Se o x for igual então o movimento é vertical
@@ -260,8 +262,9 @@ def check_for_obstacles(control):
 	if 'old_direction' in control:
 		if control['old_direction'] != direction:
 			control['turns'] = control['turns'] + 1
-			control['old_direction'] = direction
 			print("Mudanças de direção ", control['turns'])
+	
+	control['old_direction'] = direction
 
 	# Definir o endereço e a porta do servidor
 	server_conf = (SERVER, PORT)  # 127.0.0.1 é o loopback (localhost)
@@ -293,7 +296,9 @@ def check_for_obstacles(control):
 	# Receber uma resposta (opcional)
 	data, _ = client_socket.recvfrom(1024)
 	response = data.decode('utf-8')
-	print(f"Check: Resposta do servidor: {response}")
+	
+	if DEBUG:
+		print(f"Check: Resposta do servidor: {response}")
 
 	#future_request = check_for_obstacles_client.send_request(my_name, next_position)
 	#rclpy.spin_until_future_complete(check_for_obstacles_client, future_request)
@@ -303,12 +308,14 @@ def check_for_obstacles(control):
 
 	# Verifica a resposta
 	if response == 1:
-		print("Encontrou um obstáculo em ", test_position)
+		if DEBUG:
+			print("Encontrou um obstáculo em ", test_position)
 		control["obstacles_found"] = True
 		mark_obstacle(test_position, direction)
 
 	else:
-		print("Sem obstáculos em ", test_position)
+		if DEBUG:
+			print("Sem obstáculos em ", test_position)
 		control["obstacles_found"] = False
 
 
@@ -323,6 +330,8 @@ def inform_position(control):
 
 	my_name = control["my_name"]
 	my_position = control["my_position"]
+	control["go_ahead"] = control["go_ahead"] + 1
+	print("Para frente ", control["go_ahead"])
 	
 	# Definir o endereço e a porta do servidor
 	server_conf = (SERVER, PORT+1)  # 127.0.0.1 é o loopback (localhost)
@@ -339,12 +348,14 @@ def inform_position(control):
 	# Receber uma resposta (opcional)
 	data, _ = client_socket.recvfrom(1024)
 	response = data.decode('utf-8')
-	print(f"Inform position: Resposta do servidor: {response}")
+	if DEBUG:
+		print(f"Inform position: Resposta do servidor: {response}")
 
 def mark_obstacle(position, direction):
 	(x, y) = position
 
-	print("Marcando obstáculo no mapa")
+	if DEBUG:
+		print("Marcando obstáculo no mapa")
 
 	array2d = control["map"]
 
@@ -460,12 +471,17 @@ def robot_step():
 				if DEBUG:
 					print("Foi possível resolver")
 					print(maze_path)
-					draw_path(maze_path)
+				
+				# Desenha a linha que mostra o caminho a ser percorrido
+				draw_path(maze_path)
+
 			else:
 				print("Não foi possível resolver")
 
 			time_after = time.perf_counter()
-			print(f"Tempo de execução: a* {time_after - time_before:.4f} segundos")
+			
+			if DEBUG:
+				print(f"Tempo de execução: a* {time_after - time_before:.4f} segundos")
 			
 			control["first_step"] = False
 		else:
@@ -476,7 +492,9 @@ def robot_step():
 			time_before = time.perf_counter()
 			walk_one_step()
 			time_after = time.perf_counter()
-			print(f"Tempo de execução: walk-one-step {time_after - time_before:.4f} segundos")
+			
+			if DEBUG:
+				print(f"Tempo de execução: walk-one-step {time_after - time_before:.4f} segundos")
 					
 	time.sleep(1)
 
@@ -541,7 +559,7 @@ def main(args=None):
 	my_position = (20, 20)
 	my_name = request_response.robot_name
 	draw_square(my_position[0], my_position[1], color_green)
-	control["movements"] = 0
+	control["go_ahead"] = 0
 	control["turns"] = 0
 	control["my_position"] = my_position
 	control["my_name"] = my_name
@@ -579,7 +597,8 @@ def main(args=None):
 
 		time_after = time.perf_counter()
 
-		print("Tempo em robot_step: ", time_after-time_before)
+		if DEBUG:
+			print("Tempo em robot_step: ", time_after-time_before)
 
 		pygame.time.wait(10)
 		

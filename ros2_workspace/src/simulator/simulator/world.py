@@ -615,7 +615,7 @@ dt = 0
 
 # Tamanho padrão dos objetos
 size = 30
-obstacle_size = 3
+obstacle_size = 10
 
 # Tamanho da tela
 max_screen_size = 720
