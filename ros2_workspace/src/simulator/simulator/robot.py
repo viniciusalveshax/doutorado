@@ -11,7 +11,7 @@ import threading
 # Para conectar no servidor sem passar pelo ROS
 import socket
 
-# Para desacelerar o tempo de simulação
+# Para desacelerar o tempo de simulação e para medir o tempo de execução
 import time
 
 # Bibliotecas do ROS2
@@ -38,7 +38,7 @@ color_green = (0, 255, 0)
 color_red = (255, 0, 0)
 
 #Obstáculo - Azul
-obstacle_color = (0, 0, 255)
+color_security = (0, 0, 255)
 
 # Tamanho padrão do "robô"
 size = 30
@@ -257,6 +257,12 @@ def check_for_obstacles(control):
 		else:
 			direction = 'left'
 
+	if 'old_direction' in control:
+		if control['old_direction'] != direction:
+			control['turns'] = control['turns'] + 1
+			control['old_direction'] = direction
+			print("Mudanças de direção ", control['turns'])
+
 	# Definir o endereço e a porta do servidor
 	server_conf = (SERVER, PORT)  # 127.0.0.1 é o loopback (localhost)
 
@@ -342,8 +348,6 @@ def mark_obstacle(position, direction):
 
 	array2d = control["map"]
 
-	array2d[x-delta_security_x:x+delta_security_x, y-delta_security_y:y+delta_security_y] = color_black
-
 	delta_obstacle_x = 3
 	delta_obstacle_y = 3
 
@@ -354,7 +358,9 @@ def mark_obstacle(position, direction):
 		delta_security_x = int(size/2) + delta_obstacle_x
 		delta_security_y = int(size/2)
 
-	array2d[x-delta_obstacle_x:x+delta_obstacle_x, y-delta_obstacle_y:y+delta_obstacle_y] = obstacle_color
+	array2d[x-delta_security_x:x+delta_security_x, y-delta_security_y:y+delta_security_y] = color_security
+
+	array2d[x-delta_obstacle_x:x+delta_obstacle_x, y-delta_obstacle_y:y+delta_obstacle_y] = color_black
 
 	#for tmp_x in range(x-delta_x, x+delta_x):
 	#	for tmp_y in range(y-delta_y, y+delta_y):
@@ -367,7 +373,8 @@ def walk_one_step():
 	my_name = control["my_name"]
 	my_position = control["my_position"]
 
-	print("Dentro de walk one step. Maze_path = ", maze_path)
+	if DEBUG:
+		print("Dentro de walk one step. Maze_path = ", maze_path)
 
 	next_position = maze_path[0]
 	
@@ -415,7 +422,7 @@ def walk_one_step():
 	else:
 		control["first_step"] = True
 
-	pygame.time.wait(10)
+	
 
 # Ciclo de simulação do robô
 def robot_step():
@@ -441,27 +448,35 @@ def robot_step():
 			screen.blit(surf, (0, 0))
 			my_position = control["my_position"]
 			print("Novo plano. Minha posição:", my_position, " meu destino ", (x_destiny,y_destiny))
+
+			time_before = time.perf_counter()
+
 			# Planeja o caminho
-			maze = AStar(map=array2d, start=my_position, end=(x_destiny, y_destiny), walls=[color_black, obstacle_color], debug=DEBUG)
+			maze = AStar(map=array2d, start=my_position, end=(x_destiny, y_destiny), walls=[color_black, color_security], debug=DEBUG)
 			if maze.solve() == True:
 				#maze_path.print_map_with_solution()
 				maze_path = maze.get_path()
 				control["maze_path"] = maze_path
 				if DEBUG:
 					print("Foi possível resolver")
-				print(maze_path)
-				draw_path(maze_path)
+					print(maze_path)
+					draw_path(maze_path)
 			else:
 				print("Não foi possível resolver")
 
-			
+			time_after = time.perf_counter()
+			print(f"Tempo de execução: a* {time_after - time_before:.4f} segundos")
 			
 			control["first_step"] = False
 		else:
 			# Executa o que foi planejado
 			if DEBUG:
 				print("Já planejei. Agora vou executar")
+
+			time_before = time.perf_counter()
 			walk_one_step()
+			time_after = time.perf_counter()
+			print(f"Tempo de execução: walk-one-step {time_after - time_before:.4f} segundos")
 					
 	time.sleep(1)
 
@@ -526,6 +541,8 @@ def main(args=None):
 	my_position = (20, 20)
 	my_name = request_response.robot_name
 	draw_square(my_position[0], my_position[1], color_green)
+	control["movements"] = 0
+	control["turns"] = 0
 	control["my_position"] = my_position
 	control["my_name"] = my_name
 	#control["rclpy"] = rclpy	
@@ -556,7 +573,15 @@ def main(args=None):
 		surf = pygame.surfarray.make_surface(array2d)
 		screen.blit(surf, (0, 0))
 
+		time_before = time.perf_counter()
+
 		robot_step()
+
+		time_after = time.perf_counter()
+
+		print("Tempo em robot_step: ", time_after-time_before)
+
+		pygame.time.wait(10)
 		
 		# flip() the display to put your work on screen
 		pygame.display.flip()

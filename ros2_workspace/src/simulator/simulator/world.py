@@ -414,7 +414,7 @@ def add_static_object(position):
 	
 	static_objects.append((x,y))
 	print("Adicionando objeto estático em: X " + str(x) + " Y " + str(y))
-	draw_square(x, y, color_black)
+	draw_square(x, y, color_black, obstacle_size)
 
 #Keyboard thread that read the keyboard and do something
 def read_keyboard():
@@ -537,16 +537,12 @@ def update_screen():
 	screen.blit(surf, (0, 0))
 
 
-def draw_square(x, y, color):
+def draw_square(x, y, color, square_size = 30):
 	global img_np
 	
-	#Centraliza o robô
-	x = int(x - size/2)
-	y = int(y - size/2)
+	half_square = int(square_size/2)
 
-	#if color == color_black:
-	#	print("Draw from x ", x, " until x+size", x+size, " y ", y, " , y+size", y+size)
-	img_np[x:x+size, y:y+size] = color
+	img_np[x-half_square:x+half_square, y-half_square:y+half_square] = color
 
 	update_screen()
 
@@ -610,7 +606,7 @@ color_cyan = (0, 255, 255)
 color_green = (0, 255, 0)
 
 # Área de segurança
-color_obstacle = (0, 0, 255)
+color_security = (0, 0, 255)
 
 # Obstáculos fixos
 color_black = (0, 0, 0)
@@ -619,6 +615,7 @@ dt = 0
 
 # Tamanho padrão dos objetos
 size = 30
+obstacle_size = 3
 
 # Tamanho da tela
 max_screen_size = 720
@@ -739,7 +736,7 @@ def check_obstacles_service(running, img_np):
 
 		print(". Testando em x ", x_position, " e y ", y_position, " é = ", img_np[x_position][y_position])
 
-		if np.array_equal(img_np[x_position][y_position], color_white) or np.array_equal(img_np[x_position][y_position], color_green) or  np.array_equal(img_np[x_position][y_position], color_obstacle):
+		if np.array_equal(img_np[x_position][y_position], color_white) or np.array_equal(img_np[x_position][y_position], color_green) or  np.array_equal(img_np[x_position][y_position], color_security):
 			response = str(0)
 		else:
 			response = str(1)
