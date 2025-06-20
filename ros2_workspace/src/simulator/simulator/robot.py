@@ -387,8 +387,20 @@ def walk_one_step():
 	if DEBUG:
 		print("Dentro de walk one step. Maze_path = ", maze_path)
 
-	next_position = maze_path[0]
+	if len(maze_path) > 0:
+		next_position = maze_path[0]
+		control["maze_path"] = maze_path[1:]
+	else:
+		# Não tem mais nada para fazer
+		control["available"] = True
+		print("Cheguei ao meu objetivo")
+		movements = control["turns"] + control["go_ahead"]
+		# 2 Joules para cada movimento
+		energy_usage = movements * 2
+		print("Estimativa de energia para tarefa: ", energy_usage, " joules")
+		return
 	
+
 	if DEBUG:
 		print("Desenhando na próxima posição", next_position)
 
@@ -424,12 +436,10 @@ def walk_one_step():
 		inform_position_thread.join()
 		
 		# Remove a posição do labirinto
-		if len(maze_path) > 0:
-			control["maze_path"] = maze_path[1:]
-		else:
-			control["available"] = True
-			print("Cheguei no objetivo. Disponível para outra tarefa.")	
-
+		#if len(maze_path) == 0:
+		#	control["available"] = True
+		#	print("Cheguei ao meu objetivo")
+	
 	else:
 		control["first_step"] = True
 
@@ -496,7 +506,7 @@ def robot_step():
 			if DEBUG:
 				print(f"Tempo de execução: walk-one-step {time_after - time_before:.4f} segundos")
 					
-	time.sleep(1)
+	#time.sleep(1)
 
 
 def main(args=None):
