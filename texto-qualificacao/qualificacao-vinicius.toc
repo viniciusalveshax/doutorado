@@ -1,0 +1,11 @@
+\babel@toc {brazilian}{}\relax 
+\babel@toc {english}{}\relax 
+\babel@toc {brazilian}{}\relax 
+\contentsline {chapter}{\numberline {1}Introdução}{12}{chapter.1}%
+\contentsline {chapter}{\numberline {2}Related work}{14}{chapter.2}%
+\contentsline {chapter}{\numberline {3}Proposta de pesquisa}{16}{chapter.3}%
+\contentsline {chapter}{\numberline {4}Cronograma}{21}{chapter.4}%
+\contentsline {chapter}{\numberline {5}CONCLUSIONS AND FUTURE WORK}{22}{chapter.5}%
+\contentsline {chapter}{Refer{\^e}ncias}{23}{chapter.5}%
+\settowidth {\ei@chapnumindent }{{\sffamily \textbf {\MakeUppercase {Ap{\^e}ndice} }}}\advance \ei@chapnumindent 1.8em\relax 
+\contentsline {chapter}{\numberline {\MakeUppercase {Ap{\^e}ndice} A}Um Apêndice}{25}{chapter.1}%

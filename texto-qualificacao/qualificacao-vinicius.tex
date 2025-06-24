@@ -1,0 +1,338 @@
+\documentclass[eq,capa]{texufpel}
+
+\usepackage[utf8]{inputenc} % acentuacao
+\usepackage{graphicx} % para inserir figuras
+\usepackage[T1]{fontenc}
+
+\hypersetup{
+    hidelinks, % Remove coloração e caixas
+    unicode=true,   %Permite acentuação no bookmark
+    linktoc=all %Habilita link no nome e página do sumário
+}
+
+\unidade{Centro de Desenvolvimento Tecnológico}
+\programa{Programa de Pós-Gradua\-ção em Computação}
+\curso{Ciência da Computação}
+
+\unidadeeng{Technology Development Center}
+\programaeng{Postgraduate Program in Computing}
+\cursoeng{Computer Science}
+
+\title{Um Blabla Blablabla com Aplicações em Blablabla}
+
+\author{Aguiar}{Marilton Sanchotene de}
+\advisor[Prof.~Dr.]{Aguiar}{Marilton Sanchotene de}
+\coadvisor[Prof.~Dr.]{Aguiar}{Marilton Sanchotene de}
+\collaborator[Prof.~Dr.]{Aguiar}{Marilton Sanchotene de}
+
+%Palavras-chave em PT_BR
+%use letras minúsculas seguidas por ;
+%a última terminada por .
+\keyword{palavrachave-um;}
+\keyword{palavrachave-dois;}
+\keyword{palavrachave-tres;}
+\keyword{palavrachave-quatro.}
+
+%Palavras-chave em EN_US
+\keywordeng{keyword-one;}
+\keywordeng{keyword-two;}
+\keywordeng{keyword-three;}
+\keywordeng{keyword-four.}
+
+\begin{document}
+
+%\renewcommand{\advisorname}{Orientadora}           %descomente caso tenhas orientadora
+%\renewcommand{\coadvisorname}{Coorientadora}      %descomente caso tenhas coorientadora
+
+\maketitle 
+
+\sloppy
+
+%Opcional
+\begin{dedicatoria}
+  Dedico\ldots 
+\end{dedicatoria}
+
+%Opcional
+\begin{agradecimentos}
+  Agradeço\ldots 
+\end{agradecimentos}
+
+%Opcional
+\begin{epigrafe}
+  Só sei que nada sei.\\
+  {\sc --- Sócrates}
+\end{epigrafe}
+
+%Resumo em Portugues (no maximo 500 palavras)
+\begin{abstract}
+Bla blabla blablabla bla.  Bla blabla blablabla bla.  Bla blabla
+blablabla bla.  Bla blabla blablabla bla.  Bla blabla blablabla bla.
+Bla blabla blablabla bla.  Bla blabla blablabla bla.  Bla blabla
+blablabla bla.  Bla blabla blablabla bla.  Bla blabla blablabla bla.
+Bla blabla blablabla bla.  Bla blabla blablabla bla.  Bla blabla
+blablabla bla.  Bla blabla blablabla bla.  Bla blabla blablabla bla.
+Bla blabla blablabla bla.  Bla blabla blablabla bla.  Bla blabla
+blablabla bla.  Bla blabla blablabla bla.  Bla blabla blablabla bla.
+Bla blabla blablabla bla.
+\end{abstract}
+
+%Resumo em Inglês (no maximo 500 palavras)
+\begin{englishabstract}{Titulo do Trabalho em Ingles}
+Bla blabla blablabla bla.  Bla blabla blablabla bla.  Bla blabla
+blablabla bla.  Bla blabla blablabla bla.  Bla blabla blablabla bla.
+Bla blabla blablabla bla.  Bla blabla blablabla bla.  Bla blabla
+blablabla bla.  Bla blabla blablabla bla.  Bla blabla blablabla bla.
+Bla blabla blablabla bla.  Bla blabla blablabla bla.  Bla blabla
+blablabla bla.  Bla blabla blablabla bla.  Bla blabla blablabla bla.
+Bla blabla blablabla bla.  Bla blabla blablabla bla.  Bla blabla
+blablabla bla.  Bla blabla blablabla bla.  Bla blabla blablabla bla.
+Bla blabla blablabla bla.
+\end{englishabstract}
+
+%Lista de Figuras
+\listoffigures
+
+%Lista de Tabelas
+\listoftables
+
+%lista de abreviaturas e siglas
+\begin{listofabbrv}{ABNT}%coloque aqui a maior sigla para ajustar a distância
+        \item[ABNT] Associação Brasileira de Normas Técnicas
+        \item[NUMA] Non-Uniform Memory Access
+        \item[SIMD] Single Instruction Multiple Data
+        \item[SMP] Symmetric Multi-Processor
+        \item[SPMD] Single Program Multiple Data
+\end{listofabbrv}
+
+%Sumario
+\tableofcontents
+
+\chapter{Introdução}
+
+As robots become increasingly present in human environments, the importance of multi-robot communication will continue to grow\cite{mataric2014}. For this communication to be effectively utilized in practical applications, it must meet certain essential requirements. One of the most critical requirements is energy efficiency, given that robots are autonomous entities with their own independent power sources. However, these power sources have a limited duration and therefore require frequent recharging\cite{2022battery}.
+
+Existem duas principais maneiras de economizar energia em robôs: com melhor hardware e melhor software\cite{energyreview}. Enquanto a primeira está fora do escopo deste artigo, buscamos investigar propostas que possam contribuir com o segundo aspecto. Uma das maiores fontes de consumo de energia de robôs é na sua localização e cálculo de trajetória\cite{energyreview}. Além disso, embora possa não ser tão significativo, a necessidade frequente de comunicação também envolve o consumo de energia de maneira que poderia ser desejável mimimizar a comunicação em ambientes com múltiplos robôs. Além disso, uma comunicação frequente exige condições de transmissão que nem sempre podem estar disponíveis, de maneira que os algoritmos de um robô não podem ser totalmente dependentes desta\cite{2021decentralized}\cite{2021smmr}. 
+
+In this context, we propose a communication method inspired by board games, which has the potential to aid in both of these aspects. 
+
+There are countless board games, but a significant portion of them are characterized by an environment where pieces move within a discrete space\cite{boardgameshistory}. This discretization of space inspires intriguing algorithmic approaches that can be both easily understood by humans and quickly processed by machines. The use of simple algorithms can not only reduces energy consumption but also takes advantage of discretized environments as a simplification of reality, which can lead to a reduced need for data transfer.
+
+Among board games, one of the oldest and most well-known is Chess\cite{boardgameshistory}. As a game typically played by two people, it was natural that soon after its invention, the desire to play the game with two players who are physically distant from each other would arise. Given that both players are familiar with the initial state and the rules of the game, it is possible to determine the future state of the board based on the history of moves. A standard was thus established that allows for the encoding of only the piece being moved and its destination\cite{xadrez}.
+
+De maneira análoga, o presente artigo apresenta um mecanismo semelhante com o intuito de compartilhar informações sobre a ocupação do ambiente minimizando a quantidade de dados trocados entre os robôs com uma consequente diminuição de energia.
+
+%Similarly, this article presents a mechanism designed with the purpose of sharing information about the occupancy of an environment while minimizing the amount of data exchanged between robots. By reducing the volume of data transmission, this approach also leads to a corresponding decrease in energy consumption.
+
+\chapter{Related work}
+
+Várias abordagens tem sido utilizadas para obter um melhor uso de recursos energéticos. \cite{2020collective} trata o conjunto de robôs como uma espécie de esquadra que podem compartilhar informações sobre trajetórias. Outra proposta diferente porém com o mesmo objetivo é a dos "robôs caroneiros"\cite{2017hitchhiking}. Aqui um robô avisa através de um meio compartilhado qual o seu destino e outros robôs podem simplesmente seguir o primeiro. Entretanto para maior aproveitamento, essas abordagens requerem que os robôs estejam se deslocando para um mesmo local no mapa.
+
+O artigo de \cite{2021antcolony} faz algumas modificações em um algoritmo do tipo "colônia de formigas" para transformar este em multi-objetivo, sendo a minimização do consumo de energia um destes.
+
+%Several approaches have been employed to achieve more efficient use of energy resources. In \cite{2020collective}, the set of robots is treated as a kind of fleet, where they can share trajectory information among themselves. Another distinct approach, but with the same goal, is the concept of ``hitchhiking robots"\cite{2017hitchhiking}. In this scenario, one robot announces its destination through a shared medium, allowing other robots to simply follow its path. However, for optimal efficiency, these approaches require the robots to be moving toward the same location on the map.
+
+%The article by \cite{2021antcolony} introduces several modifications to an ``ant colony" algorithm, adapting it to become multi-objective, with the minimization of energy consumption being one of its primary objectives.
+
+\cite{2023d2coplan} enfatiza o treinamento distribuído de uma rede neural com o objetivo de gerar um mapa de uma localização desconhecida mas nele não é dada muita ênfase na comunicação entre os agentes. \cite{firesearching} também tem uma abordagem baseada em vários agentes distribuídos que compartilham o objetivo de encontrar focos de incêncio. Aqui os autores optaram por utilizar uma mapa topológico compartilhado.
+
+Diversos projetos como \cite{melo2023dataset} provem conjuntos de dados que podem ser utilizados para treinamentos e validação de soluções envolvendo multi-robôs. \cite{2020sean} propôe não só um conjunto de dados para validação como uma plataforma para o desenvolvimento de aplicações envolvendo robôs e outros agentes móveis, incluindo pessoas.
+
+
+%Several projects, such as \cite{melo2023dataset}, provide datasets that can be used for the training and validation of multi-robot solutions. Additionally, \cite{2020sean} not only proposes a dataset for validation purposes but also introduces a platform designed for the development of applications involving robots and other mobile agents, including humans.
+
+\cite{2021decentralized} faz uma interessante mescla entre grades tridimensionais armazenadas individualmene por cada robô e um mapa topológico compartilhado. Conforme o mesmo a abordagem parece bastante interessante em ambientes desconhecidos de larga escala. A proposta faz uso de pequenos pacotes de dados para compartilhar informações mesmo com baixa largura de banda. Outro sistema desenvolvido com base em exploração de sistemas desconhecidos é \cite{2022lamp}. O sistema é muito promissor embora os próprios autores citem que a arquitetura possui uma forte característica centralizadora que pode ser retrabalhada posteriormente. Outro projeto que mostra preocupação com baixa comunicação entre os agentes é \cite{2021smmr}, nele os 
+
+Ainda sobre a representação de mapas, alguns artigos focam em como múltiplos mapas podem ser fundidos em um único\cite{2021mapmerging}. Diferente da proposta do nosso artigo, aqui os mapas são criados em separado e depois mesclados. Novamente a abordagem baseada em jogos de tabuleiro mostra-se interessante pois se os mapas são criados a partir de uma mesma base e mantidos sincronizados a mesclagem entre esses mapas é mais simples. Claro que essa abordagem só é possível com ambientes previamente mapeados.
+
+Uma das primeiras decisões a serem tomadas no projeto de robôs móveis é a escolha de como o mapa do mundo será representado. As duas principais maneiras de fazer isso são utilizar um mapa baseado em grade ou um mapa topologico\cite{thrun1996integrating}. No mapa em forma de grid o espaço físico, seja bi ou tridimensional é dividido em células de tamanho relativamente uniformes. No mapa topologico o ordenamento é dado pelas características de um determinado ambiente. Pode-se por exemplo representar espaços de acordo com a interconexão entre eles, sem levar em conta a área dos mesmos. Cada abordagem tem suas vantagens e desvantagens e inclusivo é possível, na prática, usar uma mescla de ambas\cite{thrun1996integrating}.
+
+%One of the first decisions to be made when designing mobile robots is choosing how the world map will be represented. The two main ways to do this are to use a grid-based map or a topological\cite{thrun1996integrating} map. In the grid-based map, physical space, whether two or three-dimensional, is divided into cells of relatively uniform size. In the topological map, the ordering is given by the characteristics of a given environment. For example, spaces can be represented according to the interconnection between them, without taking their area into account. Each approach has its advantages and disadvantages and it is even possible, in practice, to use a mixture of both\cite{thrun1996integrating}.
+
+%\cite{2021decentralized} presents an interesting combination of three-dimensional grids that are individually stored by each robot along with a shared topological map. According to the authors, this approach appears to be particularly effective in large-scale, unknown environments. The proposal leverages small data packets to share information, even when bandwidth is limited. Another system designed for exploring unknown environments is \cite{2022lamp}. While the system shows a lot of promise, the authors themselves acknowledge that the architecture has a strong centralized characteristic, which might need to be reworked in the future. Another project that addresses the challenge of low communication between agents is \cite{2021smmr}, in which the focus is also on minimizing communication.
+
+%\cite{2023d2coplan} emphasizes the distributed training of a neural network with the goal of generating a map of an unknown location. However, the study does not place much emphasis on communication between the agents involved. Similarly, \cite{firesearching} adopts a multi-agent distributed approach where the agents share the common goal of locating fire outbreaks. In this case, the authors choose to use a shared topological map.
+
+
+%Regarding map representation, some studies focus on how multiple maps can be merged into a single one\cite{2021mapmerging}. Unlike the approach in our article, where maps are created separately and then merged, these studies propose a different strategy. Once again, the approach based on board games proves to be interesting, as if the maps are created from the same base and kept synchronized, the merging process becomes simpler. Of course, this method is only feasible in environments that have been previously mapped.
+
+No artigo \cite{2015rrt} é apresentado o algoritmo RRTX, que aparenta ser bastante adequado para atualização de trajetórias em ambientes sujeitos à mudanças frequentes. Porém não é mencionado no mesmo preocupação explícita com o consumo de energia. 
+
+%In the article \cite{2015rrt}, the RRTX algorithm is introduced, which appears to be highly suitable for updating trajectories in environments that are subject to frequent changes. However, the article does not explicitly address concerns regarding energy consumption.
+
+
+\chapter{Proposta de pesquisa}
+
+Para testar a proposta foi utilizado como middleware o software ROS (Robot Operating System). ROS foi escolhido pois é um middleware bastante utilizado na área de robótica \cite{2023swarmslam}\cite{2021smmr} e que possui um ecossistema bastante atuante que provê exemplos e bibliotecas de códigos diversos. O ROS suporta várias linguagens sendo incentivadas no site oficial da plataforma as linguagens C++ e Python. Para agilizar a prototipagem foi adotada a linguagem Python para o projeto.
+
+Além disso o ROS possui dois principais mecanismos de comunicação: o modelo cliente/servidor e o modelo publisher/subscriber e ambos foram utilizados na proposta. A imagem \ref{fig1} mostra a estrutura básica de comunicação do sistema. As elipses representam nós na arquitetura, quadrados representam tópicos e losângos representam serviços. As setas indicam o fluxo de informação. 
+
+%To test the proposed approach, the ROS (Robot Operating System) middleware was utilized. ROS was chosen because it is widely used in the field of robotics \cite{2023swarmslam}\cite{2021smmr} and has a very active ecosystem that provides numerous examples and code libraries. ROS supports several programming languages, with C++ and Python being particularly encouraged on the platform's official website. To speed-up prototyping, Python was selected for this project.
+
+%Furthermore, ROS offers two main communication mechanisms: the client/server model and the publisher/subscriber model, both of which were employed in the proposed system. Figure \ref{fig1} illustrates the basic communication structure of the system. In this diagram, ellipses represent nodes in the architecture, squares represent topics, and diamonds represent services. The arrows indicate the flow of information.
+
+
+%\begin{figure*}[h!]
+  %\includegraphics[width=\textwidth,height=6.5cm]{Diagrama1.png}
+%  \caption{System communication architecture.}
+%\label{fig1}
+%\end{figure*}
+
+
+O nó "Map Share Server" é responsável por iniciar antes dos demais e fazer o carregamento do mapa. Esse nó provê os serviços GetMapData e SendMsgServer, sendo que o primeiro serviço é responsável por fornecer os dados do mapa para os clientes e o outro é responsável por receber mensagens vindas dos clientes. Além disso o nó também escreve no tópico GetMapInfo a cada vez que houver alguma mudança no mapa.
+
+O nó "Map Client" representa os robôs movimentam-se no cenário e compartilhando informações. Ao iniciar os nós desse tipo chamam o serviço GetMapData para obter informações sobre o mapa. Quando os clientes encontram obstáculos no mapa eles fazem uma chamada ao serviço SendMsgServer passando a localização do obstáculo. O serviço recebe o aviso e escreve no tópico "GetMapInfo" informando todos os nós do obstáculo encontrando. Os nós inscrevem-se no tópico "GetMapInfo" logo após terem iniciado e portanto recebem mensagens sempre que alguém, no caso o servidor, publicar nesse nó. Ao receber atualizações os nós também atualizam internamente seus mapas para ficarem cientes dos obstáculos e levarem eles em consideração ao calcularem suas trajetórias.
+
+%The ``Map Share Server" node is responsible for starting before the others and loading the map. This node provides two services: GetMapData and SendMsgServer. The GetMapData service is responsible for supplying map data to the clients, while the SendMsgServer service is responsible for receiving messages from the clients. Additionally, the node publishes to the GetMapInfo topic whenever there is a change in the map.
+
+%The ``Map Client" node represents the robots that move within the scenario and share information. Upon initialization, these nodes call the GetMapData service to obtain information about the map. When the clients encounter obstacles on the map, they call the SendMsgServer service, passing the location of the obstacle. The service receives this alert and publishes it to the GetMapInfo topic, informing all nodes about the detected obstacle. The nodes subscribe to the GetMapInfo topic immediately after initialization, ensuring they receive messages whenever the server publishes updates. Upon receiving these updates, the nodes also update their internal maps to account for the obstacles, ensuring these are considered when calculating their trajectories.
+
+O nó cliente também é capaz de ler o teclado e portanto aceitar comandos, sendo os principais 'goto', 'gotominimap', 'put', 'exit'. O comando 'goto' e 'gotominimap' são responsáveis por iniciar uma movimentação automática até algum ponto do mapa e serão detalhados a seguir. 'put' aceita coordenadas e simula a colocação de obstáculos ainda não detectados. O comando 'exit' encerra o cliente. Além disso comandos de movimentação através das teclas 'w', 's', 'a' e 'd' também são aceitos.
+
+Tanto os comandos 'goto' quanto 'gotominimap' aceitam dois parâmetros x e y que representam o destino para onde o agente deve ser movido. Ambos os comandos utilizam o algoritmo A* para o cálculo de trajetórias. A diferença entre ambos é que enquanto o comando 'goto' utiliza como entrada do algoritmo o mapa completo, o 'gotominimap' utiliza como entrada uma amostragem do mapa. Essa abordagem é utilizada também com o intuito de consumir menos energia no cálculo da trajetória.
+
+%The client node is also capable of reading keyboard inputs, allowing it to accept commands such as `goto', `gotominimap', `put', and `exit'. The `goto' and `gotominimap' commands initiate automatic movement to a specific point on the map, which will be explained in more detail below. The `put' command accepts coordinates and simulates the placement of previously undetected obstacles. The `exit' command terminates the client. Additionally, movement commands using the `w', `s', `a', and `d' keys are also accepted.
+
+%Both the `goto' and `gotominimap' commands accept two parameters, x and y, which represent the destination coordinates where the agent should move. Both commands use the A* algorithm for trajectory calculation. The difference between the two is that while the `goto' command uses the complete map as input for the algorithm, the `gotominimap' command uses a sampled portion of the map. This approach is also employed to reduce energy consumption during trajectory calculation.
+
+
+A imagem \ref{map1} mostra um mapa criado para testar o conceito. As cores, no momento, não tem significado especial, mas foram adotadas pois futuramente pretende-se adicionar um significado semântico no mapa, onde cores diferentes representariam salas com propósitos diferentes.
+
+A figura \ref{map2} representa uma versão amostrada do mesmo mapa. A verão original do mapa possui um tamanho quadrado de altura de 720 pixels. Para a amostragem foi escolhido um fator de 1:20. Para melhor entendimento da proposta, no artigo ela foi redimensionada por um software externo para obter um tamanho semelhante ao mapa original.
+
+%Figure \ref{map1} shows a map created to test the concept. The colors currently do not have any special significance, but they were chosen with the intention of eventually adding semantic meaning to the map, where different colors would represent rooms with different purposes.
+
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=6cm]{map.png}}
+\caption{Original map.}
+\label{map1}
+\end{figure}
+
+%Figure \ref{map2} represents a sampled version of the same map. The original map has a square shape with a height of 720 pixels. For the sampling process, a factor of 1:20 was chosen. To better illustrate the concept, in the article, the sampled map was resized using external software to match the original map's size more closely.
+ 
+\begin{figure}[h!]
+\centerline{\includegraphics[width=6cm]{minimap.png}}
+\caption{Original map sampling.}
+\label{map2}
+\end{figure}
+
+A imagem amostrada possui na realidade um tamanho quadrado com 72 pixels de altura. Com o fator escolhido seria esperado que o quadrado possuísse dimensões 36 x 36 pixels. Porém
+% durante a construção do mini-mapa é calculada a existência de obstáculos entre pontos amostrados vizinhos. Optou-se por salvar a informação sobre obstáculos na versão do mini-mapa dentro da própria estrutura de dados que armazena os pixels do mapa duplicando portanto o tamanho do mini-mapa. Nele as colunas e linhas pares representam a existência ou não de obstáculos existentes entre as linhas ímpares. Nos pixels das linhas pares a cor preta foi escolhida para representar a existência de obstáculos e a cor cinza para representar a inexistência de obstáculos.
+
+Conforme dito anteriormente os comandos 'goto' e 'gotominimap' levam a uma simulação de movimento do robô. Em versões preliminares o mapa, trajetória e demais elementos foram representados em modo texto. Para facilitar a visualização foi adotada uma visualização gráfica do mapa, trajetória e posição do agente. Foi utilizada a biblioteca Pygame que permite gerenciar de forma mais fácil o desenho de formas geométricas, bem como utilizar as vantagens da biblioteca na criação de janelas, atualização da tela e captura de eventos do teclado e mouse.
+ 
+A posição original do agente é caracterizada por um quadrado vermelho e o destino do mesmo é marcado por um quadrado de cor ciano. Antes de começar a se movimentar o agente utiliza o algoritmo A* para calcular qual a melhor trajetória possível. O A* é o algoritmo mais famoso de planejamento de trajetórias e é computacionalmente simples e portanto muito adequado para situações onde deseja-se economizar energia \cite{raj2022comprehensive}. Segundo \cite{2021surveypath} "A* is a strong-performing option for static environments because of the low memory usage, computational speed, less implementation complexity, and efficiency making it suitable also for use in embedded system deployment". A heurística utilizada na implementação foi a distância Manhattan. 
+
+%The sampled image actually has a square size with a height of 72 pixels. Given the chosen sampling factor, it would be expected for the square to have dimensions of 36 x 36 pixels. However, during the construction of the mini-map, the existence of obstacles between neighboring sampled points is calculated. It was decided to store the information about obstacles within the mini-map's data structure, which holds the map's pixels, effectively doubling the size of the mini-map. In this structure, even rows and columns represent the presence or absence of obstacles between the odd rows. In the even rows, the color black was chosen to indicate the presence of obstacles, while gray represents the absence of obstacles.
+
+%As previously mentioned, the `goto' and `gotominimap' commands simulate the robot's movement. In earlier versions, the map, trajectory, and other elements were represented in text mode. To improve visualization, a graphical representation of the map, trajectory, and agent position was adopted. The Pygame library was used, which allows for easier management of drawing geometric shapes and offers the advantages of creating windows, updating the screen, and capturing keyboard and mouse events.
+
+%The agent's original position is marked by a red square, and its destination is indicated by a cyan-colored square. Before beginning to move, the agent uses the A* algorithm to calculate the optimal trajectory. A* is the most well-known path planning algorithm and is computationally simple, making it highly suitable for situations where energy conservation is a priority \cite{raj2022comprehensive}. According to \cite{2021surveypath}, ``A* is a strong-performing option for static environments because of the low memory usage, computational speed, less implementation complexity, and efficiency making it suitable also for use in embedded system deployment.'' The heuristic used in the implementation was the Manhattan distance.
+ 
+A imagem \ref{astar} mostra o caminho calculado utilizando o mapa original na cor verde e o caminho calculado para o mesmo destino utilizando a amostragem do mapa na cor vermelha. A imagem foi ampliada para facilitar a comparação das trajetórias. É possível observar que a trajetória que leva em consideração o mapa completo é bem menos retilínea, fato que também levaria a um maior consumo de energia em robôs reais devido à necessidade de constantes ajustes na trajetória \cite{raj2022comprehensive}.
+
+% The image \ref{astar} shows the path calculated using the original map in green and the path calculated to the same destination using map sampling in red. The image was enlarged to facilitate the comparison of trajectories. It is possible to observe that the trajectory that takes into account the complete map is much less straight, a fact that would also lead to greater energy consumption in real robots due to the need for constant adjustments to the trajectory \cite{raj2022comprehensive}.
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=6cm]{solution2.png}}
+\caption{Trajectories generated by the A* algorithm.}
+\label{astar}
+\end{figure}
+
+A tabela \ref{table1} mostra os valores médios de quantidade nós, e tempo (em milisegundos) obtidos após executar o algoritmo A* com o mapa completo e com o mapa amostrado com 10 destinos aleatórios diferentes. 
+
+%The table \ref{table1} shows the average values of number of intermediary positions until destination, and time (in milliseconds) obtained after running the A* algorithm with the complete map and with the map sampled with 10 different random destinations.
+
+\begin{table}[htbp]
+\caption{Performance comparison of the A* algorithm}
+\begin{center}
+\begin{tabular}{ |c|c|c| } 
+\hline
+  & Number of positions & Time (ms) \\ 
+ \hline
+ Complete map & 434.8 & 0.044 \\ 
+ \hline
+ Sampled map & 22.8 & 0.026 \\ 
+ \hline
+\end{tabular}
+\label{table1}
+%\caption{Tab. 1 - Comparação da performance do algoritmo A*}
+\end{center}
+\end{table}
+
+Quando o comando 'gotomini' é digitado uma thread é iniciada e ela ficará encarregada de simular a movimentação do robô. Paralelamente a leitura do teclado é retomada. Assim é possível utilizar o comando 'put', que também aceita dois parâmetros x e y e utiliza-os para permitir a inclusão no simulador de um obstáculo que não estava anteriormente no mapa e portanto não foi levado em consideração no cálculo da trajetória. 
+
+A imagem \ref{obstacle} mostra uma captura de tela em que o agente (quadrado vermelho) está seguindo sua trajetória (linha vermelha), até que encontra um obstáculo adicionado manualmente (quadrado azul). No momento em que o mesmo é detectado a movimentação é intererrompida e o servidor é avisado desta diferença entre o mapa conhecido anteriormente e o mapa real. A imagem também mostra parte do terminal no qual o log de execução é mostrado. Posteriormente o agente pode recalcular sua rota para atingir seu objetivo original com o mapa devidamente atualizado.
+
+%When the `gotomini' command is typed, a thread is started and it will be in charge of simulating the robot's movement. At the same time, the keyboard accepts commands again. It is therefore possible to use the `put' command, which also accepts two parameters x and y and uses them to allow the inclusion in the simulator of an obstacle that was not previously on the map and therefore was not taken into account in the trajectory calculation. 
+
+%The image \ref{obstacle} shows a screenshot in which the agent (red square) is following its trajectory (red line), until it encounters a manually added obstacle (blue square). When the obstacle is detected, the movement is interrupted and the server is notified of this difference between the previously known map and the new map state. The image also shows part of the terminal in which the execution log is shown. Later, the agent can recalculate its route to reach its original objective with the map updated.
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=6cm]{obstacle.png}}
+\caption{Screenshot showing an obstacle being encountered}
+\label{obstacle}
+\end{figure}
+
+Na atuação implementação a mensagem é enviada ao servidor e então somente este escreve no tópico 'GetMapInfo' avisando todos os clientes da modificação. Assim cada cliente fica ciente do novo obstáculo e o levo em consideração ao calcular suas trajetórias. O ROS permite que o cliente escreva em um tópico mas isso não foi feito pois versões futuras desse protótipo irão poderão levar em consideração algum algoritmo de verificação se o obstáculo foi reportado por uma quantidade mínima de agentes. Isso é interessante pois a detecção de obstáculo por um único agente pode tanto ser em decorrência de algum erro no sensoreamento do mesmo quanto pode ter ocorrido em função de algum obstáculo móvel, que no instante seguinte pode ter mudado de posição no mapa.
+
+%During implementation, the message is sent to the server and then it only writes to the GetMapInfo topic, notifying all clients of the modification. This way, each client is aware of the new obstacle and take it into account when calculating their trajectories. ROS allows the client to write to a topic but this was not done as future versions of this prototype will be able to take into account some algorithm for checking whether the obstacle was reported by a minimum number of agents. This is interesting because the detection of an obstacle by a single agent may either be due to an error in its sensing or may have occurred due to a moving obstacle, which in the next instant may have changed its position on the map.
+
+
+% Colocar no final?
+Essa abordagem foi imaginada para ambientes previamente mapeados, tal qual um tabuleiro de xadrez, no qual apenas alguns objetos dentro do ambiente são capazes de se movimentar e portanto é possível compartilhar o mapa global do ambiente previamente. Entendemos que ambientes desconhecidos como por exemplo um ambiente de resgate, possuem requisitos maiores de transferência de dados pois é necessário compartilhar todo o mapa, que inicialmente é desconhecido. Embora isso limite a aplicação da presente proposta acreditamos que ela ainda é válida por possuir inúmeras aplicações, tal qual uma fábrica, campus universitário ou um shopping, no qual a planta do local é conhecida previamente e mudanças estruturais são mais raras sendo necessário somente mapear objetos menores e pessoas dentro dos mesmos e não todo o ambiente em si.
+
+%This approach was designed for previously mapped environments, like a chessboard, in which only some objects within the environment are able to move and therefore it is possible to share the global map of the environment in advance. We understand that unknown environments, such as a rescue environment, have greater data transfer requirements as it is necessary to share the entire map, which is initially unknown. Although this limits the application of this proposal, we believe that it is still valid as it has numerous applications, such as a factory, university campus or a shopping mall, in which the site plan is known in advance and structural changes are rarer and it is only necessary to map smaller objects and people inside them and not the entire environment itself.
+
+\chapter{Cronograma}
+
+O cronograma vai aqui
+
+
+\chapter{CONCLUSIONS AND FUTURE WORK}
+
+Outras ações serão adicionadas na arquitetura como o compartilhamento da própria posição dos agentes que atualmente não é compartilhada.
+
+Também serão adotadas outras estratégias para o consumo de energia como por exemplo realizar, quando houver conectividade a execução do A* no servidor, economizando energia no robô real.
+
+Futuramente pretende-se integrar o software desenvolvido com simuladores existentes e que possuam mecanismos de detecção de colisão baseados na física e na simulação de sensores diversos tais como Lidares.
+
+%Other actions will be added to the architecture, such as sharing the agents' own position, which is currently not shared.
+
+%Additional strategies for energy consumption will also be adopted, such as executing A* on the server when there is connectivity, saving energy on the real robot.
+
+%In the future, we intend to integrate the software developed with existing simulators that have better collision detection mechanisms based on physics and the simulation of various sensors such as LiDaR's.
+
+Por fim pretende-se implementar a solução em robôs reais e permitir que os mesmos possam desempenhar tarefas reais mesmo que inicialmente de pequena monta tais como carregar pequenos objetos ou servir de guias em locais públicos.
+
+Acreditamos que mesmo com as limitações apontadas nas seções anteriores a ideia é promissora e foi mostrada viável no software que foi descrito neste artigo. Esperamos que essa idéia possa influenciar outros trabalhos a desenvolver soluções elegantes, simples de entender para seres humanos e com menor consumo de energia para agentes robóticos.
+
+%Finally, the aim is to implement the solution in real robots and allow them to perform real tasks, even if initially small, such as carrying small objects or serving as guides in public places.
+
+%We believe that even with the limitations highlighted in the previous sections, the idea is promising and was shown to be viable in the software described in this article. We hope that this idea can influence other works to develop elegant solutions, simple to understand for humans and with lower energy consumption for robotic agents.
+
+% Bibliografia http://liinwww.ira.uka.de/bibliography/index.html um
+% site que cataloga no formato bibtex a bibliografia em computacao
+% \bibliography{nomedoarquivo.bib} (sem extensao)
+% \bibliographystyle{formato.bst} (sem extensao)
+
+
+\bibliographystyle{abnt}
+\bibliography{bibliografia} 
+
+% Apêndices (Opcional) - Material produzido pelo autor
+\apendices
+\chapter{Um Apêndice}
+
+Bla blabla blablabla bla.  Bla blabla blablabla bla.  Bla blabla
+
+% Anexos (Opcional) - Material produzido por outro
+%\anexos
+
+%\chapter{Um Anexo}
+
+%Bla blabla blablabla bla.  Bla blabla blablabla bla.  Bla blabla
+
+\end{document}
+
