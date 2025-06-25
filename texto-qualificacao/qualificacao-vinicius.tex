@@ -18,7 +18,7 @@
 \programaeng{Postgraduate Program in Computing}
 \cursoeng{Computer Science}
 
-\title{TITULO}
+\title{Uma arquitetura para compartilhamento de informações em sistemas multi-robôs}
 
 \author{Hax}{Vinícius Alves}
 \advisor[Prof.~Dr.]{Marques}{Felipe de Souza}
@@ -94,11 +94,31 @@ Abstract
 
 \chapter{Introdução}
 
-A medida que a presença de robôs torna-se mais comum nos ambientes de convívio humanos, a importância de compartilhamento da comunicação entre robôs também aumenta.
+A medida que a presença de robôs torna-se mais comum nos ambientes de convívio humano, é razoável supor que esses robôs precisem trocar informações entre si e com demais agentes do ambiente. Logo a questão do compartilhamento de informação entre robôs também ganha destaque conforme o avanço tecnológico acontece\cite{mataric2014}. 
 
-As robots become increasingly present in human environments, the importance of multi-robot communication will continue to grow\cite{mataric2014}. For this communication to be effectively utilized in practical applications, it must meet certain essential requirements. One of the most critical requirements is energy efficiency, given that robots are autonomous entities with their own independent power sources. However, these power sources have a limited duration and therefore require frequent recharging\cite{2022battery}.
+Segundo \cite{mataric2014} um robô é definido como: xxx
 
-Existem duas principais maneiras de economizar energia em robôs: com melhor hardware e melhor software\cite{energyreview}. Enquanto a primeira está fora do escopo deste artigo, buscamos investigar propostas que possam contribuir com o segundo aspecto. Uma das maiores fontes de consumo de energia de robôs é na sua localização e cálculo de trajetória\cite{energyreview}. Além disso, embora possa não ser tão significativo, a necessidade frequente de comunicação também envolve o consumo de energia de maneira que poderia ser desejável mimimizar a comunicação em ambientes com múltiplos robôs. Além disso, uma comunicação frequente exige condições de transmissão que nem sempre podem estar disponíveis, de maneira que os algoritmos de um robô não podem ser totalmente dependentes desta\cite{2021decentralized}\cite{2021smmr}. 
+Existem diversos tipos de robôs. Podemos, por exemplo, dividir os robôs em móveis e não-móveis sendo que ambos tem a sua aplicação. Indepedente dessa classificação é desejável que o uso de energia seja feito de forma eficiente já que energia é um recurso finito que além do custo econômico direto possui consequências ambientais e sociais desde a sua geração, passando pela transmissão até por fim chegar ao consumidor final.
+
+A questão energética merece uma atenção especial nos robôs móveis pois estes normalmente utilizam uma bateria como fonte de energia. A partir desse momento no texto utilizaremos o termo robô para se referir a robôs móveis que utilizam baterias. As baterias armazenam uma quantidade máxima de energia cujo consumo tem uma duração limitada e portanto necessita de recargas frequentes\cite{2022battery}. O próprio mecanismo de recarga irá consumir energia pois o robô precisará se deslocar até um local de reabastecimento de energia e portanto o próprio deslocamento será fonte de consumo da energia.
+
+Pode-se sempre optar por dotar os robôs de uma maior bateria, porém o uso de uma bateria de maior capacidade tem dois malefícios diretos: primeiro que uma bateria maior precisará de mais tempo para ser carregada (considerando uso de tecnologias equivalentes); além disso uma bateria maior terá um volume, e principalmente, um peso maior. Esse peso maior também acaba influenciando no consumo de energia do robô.
+
+Portanto a economia de energia é um problema relevante em projetos de robôs, independente do fato destes operarem de maneira individual ou coletiva.
+
+Obviamente que o consumo de energia em robôs dependerá muito do tipo de aplicação do robô. Um robô de demonstração terá um perfil de uso de energia muito diferente de um robô projetado para soldagem. Porém para entender melhor o problema podemos delinear duas abordagens para economizar energia em robôs: com melhor hardware e melhor software\cite{energyreview}. Enquanto a primeira poderia envolver desde materiais mais leves até motores mais eficientes nesse texto a ênfase será em investigar propostas que possam contribuir com o segundo aspecto.
+
+\section{Mapeamento do ambiente e cálculo de trajetórias}
+
+Independente da aplicação para a qual um robô foi projetado uma das principais tarefas onde um robô consome energia é na sua localização e cálculo de trajetória\cite{energyreview}. 
+% Conferir como isso está escrito na fonte original
+
+
+\section{Comunicação em sistemas multi-robôs}
+
+Além disso, embora possa não ser tão significativo, a necessidade frequente de comunicação também envolve o consumo de energia de maneira que poderia ser desejável mimimizar a comunicação em ambientes com múltiplos robôs. Além disso, uma comunicação frequente exige condições de transmissão que nem sempre podem estar disponíveis, de maneira que os algoritmos de um robô não podem ser totalmente dependentes desta\cite{2021decentralized}\cite{2021smmr}. 
+
+\section{Inspiração em jogos de tabuleiro}
 
 In this context, we propose a communication method inspired by board games, which has the potential to aid in both of these aspects. 
 
