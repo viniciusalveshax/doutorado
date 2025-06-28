@@ -106,13 +106,55 @@ Pode-se sempre optar por dotar os robôs de uma maior bateria, porém o uso de u
 
 Portanto a economia de energia é um problema relevante em projetos de robôs, independente do fato destes operarem de maneira individual ou coletiva.
 
-Obviamente que o consumo de energia em robôs dependerá muito do tipo de aplicação do robô. Um robô de demonstração terá um perfil de uso de energia muito diferente de um robô projetado para soldagem. Porém para entender melhor o problema podemos delinear duas abordagens para economizar energia em robôs: com melhor hardware e melhor software\cite{energyreview}. Enquanto a primeira poderia envolver desde materiais mais leves até motores mais eficientes nesse texto a ênfase será em investigar propostas que possam contribuir com o segundo aspecto.
+Obviamente que o consumo de energia em robôs dependerá muito do tipo de aplicação do robô. Um robô de demonstração visual\ref{show-drones} terá um perfil de uso de energia muito diferente de um robô projetado para soldagem. 
+
+% https://openverse.org/image/00828edc-fa15-4edd-9969-d8061962625a?q=drone+show&p=21
+\begin{figure}[htbp]
+\caption{Show de drones no Japão}   
+\centering \includegraphics[width=\textwidth,scale=.4]{imagens/1000_drone_show_in_Japan_REDCLIFF.jpg}\\
+\begin{flushleft}
+{\small Fonte: 1000 drone show in Japan REDCLIFF https://openverse.org/image/00828edc-fa15-4edd-9969-d8061962625a}    
+\end{flushleft}
+\label{show-drones}
+\end{figure}
+
+% https://openverse.org/image/3b8bb45c-299e-4de8-9878-371d7523d251
+\begin{figure}[htbp]
+\caption{Robôs industriais de soldagem}   
+\centering \includegraphics[width=\textwidth,scale=.4]{imagens/KUKA_Industrial_Robots_IR.jpg}\\
+\begin{flushleft}
+{\small Fonte: KUKA Industrial Robots IR https://openverse.org/image/3b8bb45c-299e-4de8-9878-371d7523d251}    
+\end{flushleft}
+\label{robo-industrial}
+\end{figure}
+
+Segundo \cite{energyreview} podemos delinear três abordagens para economizar energia em robôs: melhor hardware, melhor software ou um misto de ambos. Ainda segundo a mesma fonte, em ambientes de manufatura, por exemplo, melhor hardware pode envolver novos materiais, novos tipos de sistema de fornecimento, recuperação e distribuição de energia. Nos mesmos ambientes a melhoria de software se dá principalmente através de melhorias na otimização de trajetórias e no ordenamento das tarefas à serem realizadas. 
 
 \section{Mapeamento do ambiente e cálculo de trajetórias}
 
-Independente da aplicação para a qual um robô foi projetado uma das principais tarefas onde um robô consome energia é na sua localização e cálculo de trajetória\cite{energyreview}. 
-% Conferir como isso está escrito na fonte original
+Independente da aplicação todo robô móvel terá que realizar ao menos duas tarefas:
 
+\begin{itemize}
+    \item Descobrir como é o ambiente onde o mesmo está localizado
+    \item Descobrir a sua localização dentro desse ambiente
+\end{itemize}
+
+Como as duas tarefas possuem uma relação intrínseca elas podem ser realizadas utilizando soluções algoritmicas separadas ou uma solução conjunta. No caso de solução conjunta utiliza-se o termo SLAM  
+
+\section{Representação de mapas}
+
+\begin{itemize}
+\item Mapa em grid
+\item Mapa topológico
+\end{itemize}
+
+\section{Cálculo de trajetórias}
+
+A*, etc
+
+\section{Tarefas típicas para sistemas multi-robôs}
+
+Cobertura, busca, etc, etc
 
 \section{Comunicação em sistemas multi-robôs}
 
@@ -209,19 +251,19 @@ A figura \ref{map2} representa uma versão amostrada do mesmo mapa. A verão ori
 %Figure \ref{map1} shows a map created to test the concept. The colors currently do not have any special significance, but they were chosen with the intention of eventually adding semantic meaning to the map, where different colors would represent rooms with different purposes.
 
 
-\begin{figure}[h!]
-\centerline{\includegraphics[width=6cm]{map.png}}
-\caption{Original map.}
-\label{map1}
-\end{figure}
+%\begin{figure}[h!]
+%\centerline{\includegraphics[width=6cm]{map.png}}
+%\caption{Original map.}
+%\label{map1}
+%\end{figure}
 
 %Figure \ref{map2} represents a sampled version of the same map. The original map has a square shape with a height of 720 pixels. For the sampling process, a factor of 1:20 was chosen. To better illustrate the concept, in the article, the sampled map was resized using external software to match the original map's size more closely.
  
-\begin{figure}[h!]
-\centerline{\includegraphics[width=6cm]{minimap.png}}
-\caption{Original map sampling.}
-\label{map2}
-\end{figure}
+%\begin{figure}[h!]
+%\centerline{\includegraphics[width=6cm]{minimap.png}}
+%\caption{Original map sampling.}
+%\label{map2}
+%\end{figure}
 
 A imagem amostrada possui na realidade um tamanho quadrado com 72 pixels de altura. Com o fator escolhido seria esperado que o quadrado possuísse dimensões 36 x 36 pixels. Porém
 % durante a construção do mini-mapa é calculada a existência de obstáculos entre pontos amostrados vizinhos. Optou-se por salvar a informação sobre obstáculos na versão do mini-mapa dentro da própria estrutura de dados que armazena os pixels do mapa duplicando portanto o tamanho do mini-mapa. Nele as colunas e linhas pares representam a existência ou não de obstáculos existentes entre as linhas ímpares. Nos pixels das linhas pares a cor preta foi escolhida para representar a existência de obstáculos e a cor cinza para representar a inexistência de obstáculos.
@@ -240,11 +282,11 @@ A imagem \ref{astar} mostra o caminho calculado utilizando o mapa original na co
 
 % The image \ref{astar} shows the path calculated using the original map in green and the path calculated to the same destination using map sampling in red. The image was enlarged to facilitate the comparison of trajectories. It is possible to observe that the trajectory that takes into account the complete map is much less straight, a fact that would also lead to greater energy consumption in real robots due to the need for constant adjustments to the trajectory \cite{raj2022comprehensive}.
 
-\begin{figure}[h!]
-\centerline{\includegraphics[width=6cm]{solution2.png}}
-\caption{Trajectories generated by the A* algorithm.}
-\label{astar}
-\end{figure}
+%\begin{figure}[h!]
+%\centerline{\includegraphics[width=6cm]{solution2.png}}
+%\caption{Trajectories generated by the A* algorithm.}
+%\label{astar}
+%\end{figure}
 
 A tabela \ref{table1} mostra os valores médios de quantidade nós, e tempo (em milisegundos) obtidos após executar o algoritmo A* com o mapa completo e com o mapa amostrado com 10 destinos aleatórios diferentes. 
 
@@ -275,11 +317,11 @@ A imagem \ref{obstacle} mostra uma captura de tela em que o agente (quadrado ver
 
 %The image \ref{obstacle} shows a screenshot in which the agent (red square) is following its trajectory (red line), until it encounters a manually added obstacle (blue square). When the obstacle is detected, the movement is interrupted and the server is notified of this difference between the previously known map and the new map state. The image also shows part of the terminal in which the execution log is shown. Later, the agent can recalculate its route to reach its original objective with the map updated.
 
-\begin{figure}[h!]
-\centerline{\includegraphics[width=6cm]{obstacle.png}}
-\caption{Screenshot showing an obstacle being encountered}
-\label{obstacle}
-\end{figure}
+%\begin{figure}[h!]
+%\centerline{\includegraphics[width=6cm]{obstacle.png}}
+%\caption{Screenshot showing an obstacle being encountered}
+%\label{obstacle}
+%\end{figure}
 
 Na atuação implementação a mensagem é enviada ao servidor e então somente este escreve no tópico 'GetMapInfo' avisando todos os clientes da modificação. Assim cada cliente fica ciente do novo obstáculo e o levo em consideração ao calcular suas trajetórias. O ROS permite que o cliente escreva em um tópico mas isso não foi feito pois versões futuras desse protótipo irão poderão levar em consideração algum algoritmo de verificação se o obstáculo foi reportado por uma quantidade mínima de agentes. Isso é interessante pois a detecção de obstáculo por um único agente pode tanto ser em decorrência de algum erro no sensoreamento do mesmo quanto pode ter ocorrido em função de algum obstáculo móvel, que no instante seguinte pode ter mudado de posição no mapa.
 
