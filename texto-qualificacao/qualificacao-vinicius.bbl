@@ -1,16 +1,123 @@
 \begin{thebibliography}{\hspace{\parindent}}
 
-\bibitem[Aguiar; Marilton(2005)Aguiar; Marilton]{Aguiar:2005} AGUIAR, M.;
-  MARILTON, A\@. \textbf{Título da Monografia}. 2005. 85p. Trabalho de
-  Conclusão (Curso de Ciência da Computação) --- Centro de Desenvolvimento
-  Tecnológico, Universidade Federal de Pelotas, Pelotas.
+\bibitem[Bayer; Faigl(2021)Bayer; Faigl]{2021decentralized} BAYER, J.; FAIGL,
+  J\@. Decentralized topological mapping for multi-robot autonomous exploration
+  under low-bandwidth communication. In: EUROPEAN CONFERENCE ON MOBILE ROBOTS
+  (ECMR), 2021., 2021. \textbf{Anais{\ldots}} [S.l.:~s.n.], 2021. p.1--7.
 
-\bibitem[Moore(1979)Moore]{Moore:1979:MAI} MOORE, R.~E\@. \textbf{Methods and
-  Applications of Interval Analysis}. Philadelphia, PA, USA: Society for
-  Industrial and Applied Mathematics, 1979. xi + 190p.
+\bibitem[Carabin; Wehrle; Vidoni(2017)Carabin; Wehrle; Vidoni]{energyreview}
+  CARABIN, G.; WEHRLE, E.; VIDONI, R\@. A review on energy-saving optimization
+  methods for robotic and automatic systems. \textbf{Robotics}, [S.l.], v.6,
+  n.4, p.39, 2017.
 
-\bibitem[Neumann; Aguiar(1966)Neumann; Aguiar]{vonNeumann:1966:TSR} NEUMANN,
-  J.~von; AGUIAR, M\@. \textbf{Theory of Self-Reproducing Automata}.
-  [S.l.:~s.n.], 1966. xix + 388p.
+\bibitem[Chang; Ebadi; Denniston; Ginting; Rosinol; Reinke; Palieri; Shi;
+  Chatterjee; Morrell \MakeLowercase{et~al.}(2022)Chang; Ebadi; Denniston;
+  Ginting; Rosinol; Reinke; Palieri; Shi; Chatterjee; Morrell
+  \MakeLowercase{et~al.}]{2022lamp} CHANG, Y.; EBADI, K.; DENNISTON, C.~E.;
+  GINTING, M.~F.; ROSINOL, A.; REINKE, A.; PALIERI, M.; SHI, J.; CHATTERJEE,
+  A.; MORRELL, B. \MakeLowercase{et~al.} LAMP 2.0: A robust multi-robot SLAM
+  system for operation in challenging large-scale underground environments.
+  \textbf{IEEE Robotics and Automation Letters}, [S.l.], v.7, n.4,
+  p.9175--9182, 2022.
+
+\bibitem[Chen; Li; Zhao; Liu(2021)Chen; Li; Zhao; Liu]{2021mapmerging} CHEN,
+  B.; LI, S.; ZHAO, H.; LIU, L\@. Map merging with suppositional box for
+  multi-robot indoor mapping. \textbf{Electronics}, [S.l.], v.10, n.7, p.815,
+  2021.
+
+\bibitem[Karur; Sharma; Dharmatti; Siegel(2021)Karur; Sharma; Dharmatti;
+  Siegel]{2021surveypath} KARUR, K.; SHARMA, N.; DHARMATTI, C.; SIEGEL, J.~E\@.
+  A survey of path planning algorithms for mobile robots. \textbf{Vehicles},
+  [S.l.], v.3, n.3, p.448--468, 2021.
+
+\bibitem[Kyppö(2019)Kyppö]{boardgameshistory} KYPPö, J\@. \textbf{Board
+  Games Throughout the History and Multidimensional Space}. [S.l.]: World
+  Scientific, 2019. p.1--14.
+
+\bibitem[Lajoie; Beltrame(2023)Lajoie; Beltrame]{2023swarmslam} LAJOIE, P.-Y.;
+  BELTRAME, G\@. Swarm-slam: Sparse decentralized collaborative simultaneous
+  localization and mapping framework for multi-robot systems. \textbf{IEEE
+  Robotics and Automation Letters}, [S.l.], v.9, n.1, p.475--482, 2023.
+
+\bibitem[Marjovi; Nunes; Marques; De~almeida(2009)Marjovi; Nunes; Marques;
+  De~almeida]{firesearching} MARJOVI, A.; NUNES, J.~G.; MARQUES, L.;
+  DE~ALMEIDA, A\@. Multi-robot exploration and fire searching. In: IEEE/RSJ
+  INTERNATIONAL CONFERENCE ON INTELLIGENT ROBOTS AND SYSTEMS, 2009., 2009.
+  \textbf{Anais{\ldots}} [S.l.:~s.n.], 2009. p.1929--1934.
+
+\bibitem[Matari{\'c}(2014)Matari{\'c}]{mataric2014} MATARI{\'C}, M.~J\@.
+  \textbf{Introdu{\c{c}}{\~a}o {\`a} rob{\'o}tica}. [S.l.]: Editora Blucher,
+  2014. p.331--333.
+
+\bibitem[Mcnulty; Hennessy; Li; Armstrong; Ryan(2022)Mcnulty; Hennessy; Li;
+  Armstrong; Ryan]{2022battery} MCNULTY, D.; HENNESSY, A.; LI, M.; ARMSTRONG,
+  E.; RYAN, K.~M\@. A review of Li-ion batteries for autonomous mobile robots:
+  Perspectives and outlook for the future. \textbf{Journal of Power Sources},
+  [S.l.], v.545, p.231943, 2022.
+
+\bibitem[Melo; Cavalcanti; Joaquim; Ara{\'u}jo; Barros(2023)Melo; Cavalcanti;
+  Joaquim; Ara{\'u}jo; Barros]{melo2023dataset} MELO, J.~G.; CAVALCANTI, L.;
+  JOAQUIM, R.; ARA{\'U}JO, V.; BARROS, E\@. Dataset and Baseline Experiments
+  for Self-Localization and Tracking in the RoboCup Small Size League. In:
+  LATIN AMERICAN ROBOTICS SYMPOSIUM (LARS), 2023 BRAZILIAN SYMPOSIUM ON
+  ROBOTICS (SBR), AND 2023 WORKSHOP ON ROBOTICS IN EDUCATION (WRE), 2023.,
+  2023. \textbf{Anais{\ldots}} [S.l.:~s.n.], 2023. p.520--525.
+
+\bibitem[Miao; Chen; Yan; Wu(2021)Miao; Chen; Yan; Wu]{2021antcolony} MIAO, C.;
+  CHEN, G.; YAN, C.; WU, Y\@. Path planning optimization of indoor mobile robot
+  based on adaptive ant colony algorithm. \textbf{Computers \& Industrial
+  Engineering}, [S.l.], v.156, p.107230, 2021.
+
+\bibitem[Olcay; Schuhmann; Lohmann(2020)Olcay; Schuhmann;
+  Lohmann]{2020collective} OLCAY, E.; SCHUHMANN, F.; LOHMANN, B\@. Collective
+  navigation of a multi-robot system in an unknown environment.
+  \textbf{Robotics and Autonomous Systems}, [S.l.], v.132, p.103604, 2020.
+
+\bibitem[Otte; Frazzoli(2015)Otte; Frazzoli]{2015rrt} OTTE, M.; FRAZZOLI, E\@.
+  RRTX: Real-Time Motion Planning/Replanning for Environments with
+  Unpredictable Obstacles. In: ALGORITHMIC FOUNDATIONS OF ROBOTICS XI: SELECTED
+  CONTRIBUTIONS OF THE ELEVENTH INTERNATIONAL WORKSHOP ON THE ALGORITHMIC
+  FOUNDATIONS OF ROBOTICS, 2015. \textbf{Anais{\ldots}} [S.l.:~s.n.], 2015.
+  p.461--478.
+
+\bibitem[Raj; Kos(2022)Raj; Kos]{raj2022comprehensive} RAJ, R.; KOS, A\@. A
+  comprehensive study of mobile robot: history, developments, applications, and
+  future research perspectives. \textbf{Applied Sciences}, [S.l.], v.12, n.14,
+  p.6951, 2022.
+
+\bibitem[Ravankar; Ravankar; Kobayashi; Emaru(2017)Ravankar; Ravankar;
+  Kobayashi; Emaru]{2017hitchhiking} RAVANKAR, A.; RAVANKAR, A.~A.; KOBAYASHI,
+  Y.; EMARU, T\@. Hitchhiking robots: A collaborative approach for efficient
+  multi-robot navigation in indoor environments. \textbf{Sensors}, [S.l.],
+  v.17, n.8, p.1878, 2017.
+
+\bibitem[Sharma; Zhou; Tokekar(2023)Sharma; Zhou; Tokekar]{2023d2coplan}
+  SHARMA, V.~D.; ZHOU, L.; TOKEKAR, P\@. D2coplan: A differentiable
+  decentralized planner for multi-robot coverage. In: IEEE INTERNATIONAL
+  CONFERENCE ON ROBOTICS AND AUTOMATION (ICRA), 2023., 2023.
+  \textbf{Anais{\ldots}} [S.l.:~s.n.], 2023. p.3425--3431.
+
+\bibitem[Thrun; B{\"u}cken(1996)Thrun; B{\"u}cken]{thrun1996integrating} THRUN,
+  S.; B{\"U}CKEN, A\@. Integrating grid-based and topological maps for mobile
+  robot navigation. In:  OF THE NATIONAL CONFERENCE ON ARTIFICIAL INTELLIGENCE,
+  1996. \textbf{Proceedings{\ldots}} [S.l.:~s.n.], 1996. p.944--951.
+
+\bibitem[Tirado; Silva(1995)Tirado; Silva]{xadrez} TIRADO, A.; SILVA, W.~d\@.
+  \textbf{Meu primeiro livro de xadrez}: curso para escolares. Curitiba:
+  Expoente, 1995.
+
+\bibitem[Tsoi; Hussein; Espinoza; Ruiz; V{\'a}zquez(2020)Tsoi; Hussein;
+  Espinoza; Ruiz; V{\'a}zquez]{2020sean} TSOI, N.; HUSSEIN, M.; ESPINOZA, J.;
+  RUIZ, X.; V{\'A}ZQUEZ, M\@. Sean: Social environment for autonomous
+  navigation. In:  OF THE 8TH INTERNATIONAL CONFERENCE ON HUMAN-AGENT
+  INTERACTION, 2020. \textbf{Proceedings{\ldots}} [S.l.:~s.n.], 2020.
+  p.281--283.
+
+\bibitem[Yu; Tong; Xu; Xu; Dong; Yang; Wang(2021)Yu; Tong; Xu; Xu; Dong; Yang;
+  Wang]{2021smmr} YU, J.; TONG, J.; XU, Y.; XU, Z.; DONG, H.; YANG, T.; WANG,
+  Y\@. Smmr-explore: Submap-based multi-robot exploration system with
+  multi-robot multi-target potential field exploration method. In: IEEE
+  INTERNATIONAL CONFERENCE ON ROBOTICS AND AUTOMATION (ICRA), 2021., 2021.
+  \textbf{Anais{\ldots}} [S.l.:~s.n.], 2021. p.8779--8785.
 
 \end{thebibliography}
