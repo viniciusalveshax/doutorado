@@ -14,6 +14,9 @@ import threading
 # Para encontrar a posição inicial do robô
 import random 
 
+# Para criar o serviço que recebe mensagens dos robôs
+import socket
+
 # To load image
 from PIL import Image
 import numpy as np
@@ -27,6 +30,9 @@ color_white = (255, 255, 255)
 task_id = 0
 # Lista de tarefas
 task_list = {}
+
+SERVER='127.0.0.1'
+PORT=6666
 
 def empty_space(img_np, x, y):
 	print(img_np[x][y])
@@ -185,6 +191,42 @@ class AcceptTaskService(MinimalService):
 		return response
 
 
+def udp_server(bulletin, running = True):
+	global bulletin_publisher
+
+	bulletin_publisher = bulletin
+
+	server_conf = (SERVER, PORT)  # '' significa que o servidor ouvirá em todas as interfaces
+
+	# Criar um socket UDP
+	socket_server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+	# Vincular o socket ao endereço
+	socket_server.bind(server_conf)
+
+	while running:
+		data, client_address = socket_server.recvfrom(1024)  # 1024 é o tamanho máximo do buffer
+
+		# Decodificar os dados
+		message = data.decode('utf-8')
+
+		print('Servidor udp recebeu: ', message)
+		splitted_message = message.split(' ')
+		code = splitted_message[0]
+
+		# Obstáculo encontrado
+		if code == 'O':
+			#TODO Avisar todos que um novo obstáculo foi detectado
+			content = message
+			publish_bulletin(bulletin_publisher, content)
+
+		response = str(1)
+
+		# Enviar uma resposta
+		response = response.encode('utf-8')
+		socket_server.sendto(response, client_address)
+
+
 
 def start_ros_nodes():
 	global rclpy
@@ -195,9 +237,14 @@ def start_ros_nodes():
 	bulletin_publisher = node.create_publisher(String, '/map_info', 10)
 
 	#rclpy.spin(node)
+
+	running = True
 	
-	keyboard_thread = threading.Thread(target=read_keyboard, args=(bulletin_publisher, ))
+	keyboard_thread = threading.Thread(target=read_keyboard, args=(bulletin_publisher, running, ))
 	keyboard_thread.start()
+
+	udp_server_thread = threading.Thread(target=udp_server, args=(bulletin_publisher, running, ))
+	udp_server_thread.start()
 	
 	print(type(node))
 	print(type(bulletin_publisher))
@@ -278,7 +325,7 @@ def goto(x, y):
 	task_id = task_id + 1
 	
 
-def read_keyboard(publisher):
+def read_keyboard(publisher, running = True):
 	global bulletin_publisher
 
 	bulletin_publisher = publisher
@@ -295,6 +342,9 @@ def read_keyboard(publisher):
 		input_tokens = keyboard_input.split(' ')
 		if input_tokens[0] == "goto":
 			goto(input_tokens[1], input_tokens[2])
+	
+	running = False
+
 
 
 def main(args=None):

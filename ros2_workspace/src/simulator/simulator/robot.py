@@ -53,8 +53,11 @@ MAX_Y = 720
 
 DEBUG = False
 
-SERVER='127.0.0.1'
-PORT=6666
+TASK_SERVER='127.0.0.1'
+TASK_PORT=6666
+
+WORLD_SERVER='127.0.0.1'
+WORLD_PORT=6667
 
 class MinimalSubscriber(Node):
 	def __init__(self):
@@ -71,6 +74,32 @@ class MinimalSubscriber(Node):
 	
 	
 		self.get_logger().info('Recebi: "%s"' % msg.data)
+
+		# Testa se é um aviso de obstáculo
+		if " O " in msg.data:
+			splitted_msg = msg.data.split()
+
+			# Formato da mensagem 
+			# timestamp + " O " + x + " " + y
+			# x e y são as posições do obstáculo
+			x_str = splitted_msg[2]
+			y_str = splitted_msg[3]
+			x = int(x_str)
+			y = int(y_str)
+
+			array2d = control["map"]
+			
+			# Testa se obstáculo já não está marcado
+			if not np.array_equal(array2d[x][y], color_black):
+				print("Marcando obstáculo em ", x, " ", y)
+				mark_obstacle((x,y))
+			else:
+				print("Obstáculo já detectado em ", x, " ", y, ". Não vou fazer nada")
+
+			# Encerra essa execução do callback
+			return
+
+		# Testa se é uma nova tarefa
 		if control["available"] and ("Solicitando" in msg.data):
 			splitted_msg = msg.data.split()
 			# Formato da mensagem 
@@ -225,6 +254,45 @@ def draw_path(path_list):
 	surf = pygame.surfarray.make_surface(array2d)
 	screen.blit(surf, (0, 0))
 
+def send_message_udp(server, port, message):
+
+	# Definir o endereço e a porta do servidor
+	server_conf = (server, port)  # 127.0.0.1 é o loopback (localhost)
+
+	# Criar um socket UDP
+	client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+	# Codifica a mensagem em utf8
+	coded_message = message.encode('utf-8')
+
+	# Enviar a mensagem
+	client_socket.sendto(coded_message, server_conf)
+
+	# Receber uma resposta (opcional)
+	data, _ = client_socket.recvfrom(1024)
+	response = data.decode('utf-8')
+
+	return response
+
+
+def broadcast_obstacle(position):
+
+	(x, y) = position
+
+	# O = Obstacle
+	message = "O " + str(x) + " " + str(y)
+
+	response = send_message_udp(TASK_SERVER, TASK_PORT, message)
+
+	response = int(response)
+
+	if response == 1:
+		return True
+	else:
+		return False
+
+
+
 def check_for_obstacles(control):
 
 	numero = random.randint(1, 100)  # número aleatório entre 1 e 100
@@ -267,7 +335,7 @@ def check_for_obstacles(control):
 	control['old_direction'] = direction
 
 	# Definir o endereço e a porta do servidor
-	server_conf = (SERVER, PORT)  # 127.0.0.1 é o loopback (localhost)
+	server_conf = (WORLD_SERVER, WORLD_PORT)  # 127.0.0.1 é o loopback (localhost)
 
 	# Criar um socket UDP
 	client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -312,6 +380,7 @@ def check_for_obstacles(control):
 			print("Encontrou um obstáculo em ", test_position)
 		control["obstacles_found"] = True
 		mark_obstacle(test_position, direction)
+		broadcast_obstacle(test_position)
 
 	else:
 		if DEBUG:
@@ -334,7 +403,7 @@ def inform_position(control):
 	print("Para frente ", control["go_ahead"])
 	
 	# Definir o endereço e a porta do servidor
-	server_conf = (SERVER, PORT+1)  # 127.0.0.1 é o loopback (localhost)
+	server_conf = (WORLD_SERVER, WORLD_PORT+1)  # 127.0.0.1 é o loopback (localhost)
 
 	# Criar um socket UDP
 	client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -351,23 +420,27 @@ def inform_position(control):
 	if DEBUG:
 		print(f"Inform position: Resposta do servidor: {response}")
 
-def mark_obstacle(position, direction):
+def mark_obstacle(position, direction = False):
 	(x, y) = position
 
 	if DEBUG:
-		print("Marcando obstáculo no mapa")
+		print("Marcando obstáculo no mapa na posição ", position)
 
 	array2d = control["map"]
 
 	delta_obstacle_x = 3
 	delta_obstacle_y = 3
 
-	if direction == 'left' or direction == 'right':
-		delta_security_x = int(size/2)
+	if direction == False:
+		delta_security_x = int(size/2) + delta_obstacle_x
 		delta_security_y = int(size/2) + delta_obstacle_y
 	else:
-		delta_security_x = int(size/2) + delta_obstacle_x
-		delta_security_y = int(size/2)
+		if direction == 'left' or direction == 'right':
+			delta_security_x = int(size/2)
+			delta_security_y = int(size/2) + delta_obstacle_y
+		else:
+			delta_security_x = int(size/2) + delta_obstacle_x
+			delta_security_y = int(size/2)
 
 	array2d[x-delta_security_x:x+delta_security_x, y-delta_security_y:y+delta_security_y] = color_security
 
