@@ -25,6 +25,48 @@ from std_msgs.msg import String # type: ignore
 
 from map_interfaces.srv import InformPosition, CheckObstacles # type: ignore
 
+# Cria uma lista, inicialmente vazia, de objetos que se movem
+dynamic_objects = []
+
+static_objects = []
+
+robot_objects = {}
+
+# Configura algumas cores comuns
+color_red = (255, 0, 0)
+
+# Fundo
+color_white = (255, 255, 255)
+color_cyan = (0, 255, 255)
+
+# Robôs
+color_green = (0, 255, 0)
+
+# Área de segurança
+color_security = (0, 0, 255)
+
+# Obstáculos fixos
+color_black = (0, 0, 0)
+
+dt = 0
+
+# Tamanho padrão dos objetos
+size = 30
+obstacle_size = 10
+
+# Tamanho da tela
+max_screen_size = 720
+
+img_np = np.empty((2, 2))
+
+screen = pygame.display.set_mode((max_screen_size, max_screen_size))
+
+DEBUG=False
+
+# Informação para a conexão UDP
+SERVER='127.0.0.1'
+PORT=6667
+
 class MinimalService(Node):
 	def __init__(self, node_name, server_interface_type, topic_name):
 		super().__init__(node_name)
@@ -285,47 +327,6 @@ def draw_square(x, y, color, square_size = 30):
 	img_np[x-half_square:x+half_square, y-half_square:y+half_square] = color
 
 	update_screen()
-
-# Cria uma lista, inicialmente vazia, de objetos que se movem
-dynamic_objects = []
-
-static_objects = []
-
-robot_objects = {}
-
-# Configura algumas cores comuns
-color_red = (255, 0, 0)
-
-# Fundo
-color_white = (255, 255, 255)
-color_cyan = (0, 255, 255)
-
-# Robôs
-color_green = (0, 255, 0)
-
-# Área de segurança
-color_security = (0, 0, 255)
-
-# Obstáculos fixos
-color_black = (0, 0, 0)
-
-dt = 0
-
-# Tamanho padrão dos objetos
-size = 30
-obstacle_size = 10
-
-# Tamanho da tela
-max_screen_size = 720
-
-img_np = np.empty((2, 2))
-
-screen = pygame.display.set_mode((max_screen_size, max_screen_size))
-
-DEBUG=False
-
-SERVER='127.0.0.1'
-PORT=6666
 
 def start_ros_services():
 
