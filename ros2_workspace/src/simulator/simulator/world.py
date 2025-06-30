@@ -33,20 +33,26 @@ static_objects = []
 robot_objects = {}
 
 # Configura algumas cores comuns
-color_red = (255, 0, 0)
 
 # Fundo
 color_white = (255, 255, 255)
-color_cyan = (0, 255, 255)
 
 # Robôs
-color_green = (0, 255, 0)
+color_yellow = (255, 255, 0)
+color_cyan = (0, 255, 255)
+color_magent = (255, 0, 255)
 
 # Área de segurança
 color_security = (0, 0, 255)
 
 # Obstáculos fixos
 color_black = (0, 0, 0)
+
+robot_colors = {
+	"Wall_E": color_yellow,
+	"Johnny_V": color_cyan,
+	"ED209": color_magent
+}
 
 dt = 0
 
@@ -150,6 +156,7 @@ def check_colision(x, y, movement_sense):
 		x_left, y_left = x, y + step_size
 		x_right, y_right = x, y - step_size
 
+	#robot_color = robot_colors[robot_name]
 		
 	#print("Testando para ponto no meio ", x, y)	
 	#print("Testando para ponto na esquerda ", x_left, y_left)
@@ -234,10 +241,10 @@ def update_objects():
 
 	#print(robot_objects)	
 	for robot_name, robot_positions in robot_objects.items():
-		update_robot(robot_positions)	
+		update_robot(robot_positions, robot_colors[robot_name])	
 
 		
-def update_robot(robot_positions):
+def update_robot(robot_positions, robot_color):
 
 	#TODO Testa se já existia um robô com esse nome, caso sim apaga o desenho da posição antiga
 
@@ -253,7 +260,7 @@ def update_robot(robot_positions):
 	(new_x, new_y) = robot_positions["my_position"]
 	
 	#Desenha robô na posição nova
-	draw_square(new_x, new_y, color_green)
+	draw_square(new_x, new_y, robot_color)
 		
 	#print("Posição do robô ", robot_name, " é X:", x, " e Y:", y) 
 
@@ -435,7 +442,9 @@ def check_obstacles_service(running, img_np):
 
 		print(". Testando em x ", x_position, " e y ", y_position, " é = ", img_np[x_position][y_position])
 
-		if np.array_equal(img_np[x_position][y_position], color_white) or np.array_equal(img_np[x_position][y_position], color_green) or  np.array_equal(img_np[x_position][y_position], color_security):
+		robot_color = robot_colors[robot_name]
+
+		if np.array_equal(img_np[x_position][y_position], color_white) or np.array_equal(img_np[x_position][y_position], robot_color) or  np.array_equal(img_np[x_position][y_position], color_security):
 			response = str(0)
 		else:
 			response = str(1)
