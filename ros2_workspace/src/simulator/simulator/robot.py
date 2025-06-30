@@ -330,7 +330,8 @@ def check_for_obstacles(control):
 	if 'old_direction' in control:
 		if control['old_direction'] != direction:
 			control['turns'] = control['turns'] + 1
-			print("Mudanças de direção ", control['turns'])
+			if DEBUG:
+				print("Mudanças de direção ", control['turns'])
 	
 	control['old_direction'] = direction
 
@@ -400,7 +401,9 @@ def inform_position(control):
 	my_name = control["my_name"]
 	my_position = control["my_position"]
 	control["go_ahead"] = control["go_ahead"] + 1
-	print("Para frente ", control["go_ahead"])
+
+	if DEBUG:
+		print("Para frente ", control["go_ahead"])
 	
 	# Definir o endereço e a porta do servidor
 	server_conf = (WORLD_SERVER, WORLD_PORT+1)  # 127.0.0.1 é o loopback (localhost)
